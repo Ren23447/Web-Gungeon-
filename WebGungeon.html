@@ -6,9 +6,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/Ren23447/Web-Gungeon-/refs/heads/main/ICON.png">
 <style>
-  html,body{margin:0;padding:0;background:#0a0c10;color:#e8edf2;font-family:'Courier New',monospace;overflow:hidden;height:100%;}
-  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,#13161d,#04060a);}
-  canvas{image-rendering:pixelated;image-rendering:crisp-edges;background:#000;box-shadow:0 0 60px rgba(215,38,61,.25),0 0 8px rgba(0,0,0,.8);cursor:crosshair;}
+  html,body{margin:0;padding:0;background:#000;color:#e8edf2;font-family:'Courier New',monospace;overflow:hidden;height:100%;}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;}
+  canvas{image-rendering:pixelated;image-rendering:crisp-edges;background:#000;box-shadow:0 0 8px rgba(0,0,0,.8);cursor:crosshair;}
   #hint{position:fixed;bottom:6px;left:8px;font-size:11px;color:#445;letter-spacing:1px;}
 </style>
 </head>
@@ -274,7 +274,7 @@ function buildTiles(){
       // thin dark inner-edge to separate the cap from the lip cleanly
       x.fillStyle = 'rgba(0,0,0,0.45)'; x.fillRect(0,4,16,1);
       // ---- LIT TOP LIP — two-tone chiseled bevel ----
-      x.fillStyle = th.wfaceHi; x.fillRect(0,5,16,1);   // brightest edge
+      x.fillStyle = th.wfaceMid; x.fillRect(0,5,16,1);   // lip bevel
       x.fillStyle = th.wfaceMid; x.fillRect(0,6,16,1);  // softer sub-bevel
       // ---- BRICK FACE — three courses with masonry offset splits ----
       x.fillStyle = th.wface; x.fillRect(0,7,16,9);
@@ -389,12 +389,12 @@ function buildTiles(){
       x.fillStyle = th.ceiling;           x.fillRect(xStart,   0, 5, 16); // dark
       x.fillStyle = 'rgba(255,255,255,0.07)'; x.fillRect(xStart,0, 1, 16); // outer sheen
       x.fillStyle = 'rgba(0,0,0,0.60)';  x.fillRect(xStart+4, 0, 1, 16); // inner shadow
-      x.fillStyle = th.wfaceHi;          x.fillRect(xStart+5, 0, 1, 16); // bright bevel
+      x.fillStyle = th.wfaceMid;          x.fillRect(xStart+5, 0, 1, 16); // bevel
       x.fillStyle = th.wfaceMid;         x.fillRect(xStart+6, 0, 1, 16); // sub-bevel
     }
     function depthStripR(x, xEnd){ // dark on RIGHT (xEnd = rightmost dark pixel+1)
       x.fillStyle = th.wfaceMid;         x.fillRect(xEnd-7, 0, 1, 16);   // sub-bevel
-      x.fillStyle = th.wfaceHi;          x.fillRect(xEnd-6, 0, 1, 16);   // bright bevel
+      x.fillStyle = th.wfaceMid;          x.fillRect(xEnd-6, 0, 1, 16);   // bevel
       x.fillStyle = 'rgba(0,0,0,0.60)';  x.fillRect(xEnd-5, 0, 1, 16);   // inner shadow
       x.fillStyle = th.ceiling;          x.fillRect(xEnd-4, 0, 5, 16);   // dark
       x.fillStyle = 'rgba(255,255,255,0.07)'; x.fillRect(xEnd-1,0, 1, 16); // outer sheen
@@ -433,7 +433,7 @@ function buildTiles(){
       brickRow(x, 5, 5);
       brickRow(x, 10, 6);
       // Top edge brightening (floor light bouncing from above)
-      x.fillStyle = th.wfaceHi;
+      x.fillStyle = th.wfaceMid;
       x.fillRect(0,0,16,1);
       x.fillRect(1,0,3,1); x.fillRect(6,0,3,1); x.fillRect(11,0,3,1); // sparkle
       // Progressive darkening toward bottom (wall base, less lit)
@@ -3343,6 +3343,15 @@ const WEAPONS = [
   {id:'grenade', name:'FRAG SLINGER',    rarity:'PROTOTYPE',sprite:'gunGrenade',dmg:32, fire:0.85, mag:4,  reload:1.8, speed:220, spread:0.04, count:1, color:'#4a8c50', kb:0.8, type:'grenade'},
   {id:'plasma',  name:'PLASMA CASTER',   rarity:'PROTOTYPE',sprite:'gunPlasma', dmg:14, fire:0.30, mag:10, reload:1.4, speed:300, spread:0.04, count:1, color:'#39c0ed', kb:0.5, type:'plasma'},
   {id:'acid',    name:'TOXIN SPITTER',   rarity:'TACTICAL', sprite:'gunAcid',   dmg:8,  fire:0.20, mag:14, reload:1.3, speed:260, spread:0.06, count:1, color:'#29c46d', kb:0.3, type:'acid'},
+  // ── EXTRA WEAPONS — drop-only (not in cache cycle) ──────────────────────────
+  {id:'revolver',name:'HEAVY REVOLVER',  rarity:'STANDARD', sprite:'gunPistol',  dmg:22, fire:0.55, mag:6,  reload:1.2, speed:300, spread:0.03, count:1, color:'#c8a060', kb:0.9, type:'b'},
+  {id:'burst',   name:'BURST CARBINE',   rarity:'TACTICAL', sprite:'gunRifle',   dmg:11, fire:0.09, mag:18, reload:1.3, speed:340, spread:0.07, count:1, color:'#39c0ed', kb:0.4, type:'b'},
+  {id:'sniper',  name:'PRECISION RIFLE', rarity:'ADVANCED', sprite:'gunRail',    dmg:55, fire:0.85, mag:5,  reload:1.8, speed:640, spread:0.01, count:1, color:'#fff5c2', kb:1.2, type:'pierce'},
+  {id:'minigun', name:'MINIGUN',         rarity:'ILLEGAL',  sprite:'gunSMG',     dmg:5,  fire:0.04, mag:80, reload:2.5, speed:380, spread:0.16, count:1, color:'#d7263d', kb:0.2, type:'b'},
+  {id:'dblshot', name:'DOUBLE BARREL',   rarity:'TACTICAL', sprite:'gunShot',    dmg:13, fire:0.55, mag:6,  reload:1.4, speed:275, spread:0.30, count:5, color:'#c8a060', kb:2.2, type:'b'},
+  {id:'magnum',  name:'BOUNTY MAGNUM',   rarity:'ADVANCED', sprite:'gunPistol',  dmg:36, fire:0.65, mag:4,  reload:1.5, speed:360, spread:0.02, count:1, color:'#d4cfa3', kb:1.5, type:'b'},
+  {id:'scatter', name:'SCATTER CANNON',  rarity:'PROTOTYPE',sprite:'gunGrenade', dmg:20, fire:0.80, mag:5,  reload:1.9, speed:300, spread:0.05, count:4, color:'#4a8c50', kb:1.0, type:'grenade'},
+  {id:'arcbolt', name:'ARC REPEATER',    rarity:'ADVANCED', sprite:'gunArc',     dmg:15, fire:0.14, mag:20, reload:1.5, speed:360, spread:0.05, count:1, color:'#a080ff', kb:0.5, type:'chain'},
   // ── LEGENDARY — black chest exclusives (never appear in normal drops) ──────
   {id:'omega',   name:'OMEGA DRIVER',    rarity:'LEGENDARY',sprite:'gunRail',   dmg:90, fire:1.20, mag:2,  reload:2.2, speed:680, spread:0.0,  count:1, color:'#ff4858', kb:3.0, type:'pierce', exclusive:true},
   {id:'crystal', name:'CRYSTAL CANNON',  rarity:'LEGENDARY',sprite:'gunShot',   dmg:28, fire:0.55, mag:8,  reload:1.6, speed:340, spread:0.12, count:8, color:'#9be7ff', kb:2.0, type:'b',      exclusive:true},
@@ -3351,10 +3360,18 @@ const WEAPONS = [
 ];
 const WEAPON_BY_ID = Object.fromEntries(WEAPONS.map(w=>[w.id,w]));
 
+const RARITY_COLOR = {
+  STANDARD:  '#f0b429',
+  TACTICAL:  '#39c0ed',
+  ADVANCED:  '#29c46d',
+  PROTOTYPE: '#9040d0',
+  ILLEGAL:   '#d7263d',
+  LEGENDARY: '#ff4858',
+};
+
 /* ---------- Augments ---------- */
 /* ---------- Characters (selectable variants) ---------- */
 const CHARACTERS = [
-  {id:'convict', name:'CONVICT',  desc:'BALANCED. STARTS WITH SERVICE PISTOL.',         weapon:'pistol', maxHp:6, speedMul:1.0,  ability:'molotov',  abilityName:'MOLOTOV',  abilityDesc:'LOB FIRE BOTTLE'},
   {id:'pilot',   name:'PILOT',    desc:'PRECISE. STARTS WITH RAIL CARBINE.',            weapon:'rail',   maxHp:5, speedMul:1.05, ability:'cloak',    abilityName:'CLOAK',    abilityDesc:'BRIEF INVISIBILITY'},
   {id:'hunter',  name:'HUNTER',   desc:'NIMBLE. STARTS WITH SCATTERGUN. EXTRA DASH.',   weapon:'shot',   maxHp:6, speedMul:1.10, ability:'crossbow', abilityName:'CROSSBOW', abilityDesc:'PIERCING BOLT'},
   {id:'marine',  name:'MARINE',   desc:'TANK. EXTRA HP. STARTS WITH MACHINE PISTOL.',   weapon:'smg',    maxHp:8, speedMul:0.95, ability:'supply',   abilityName:'SUPPLY',   abilityDesc:'AMMO + ARMOR DROP'},
@@ -3363,7 +3380,7 @@ const CHARACTERS = [
   {id:'robot',   name:'ROBOT',    desc:'CONSTRUCTED. EXTRA HP. STARTS WITH PLASMA CASTER.', weapon:'plasma', maxHp:7, speedMul:0.95, ability:'supply', abilityName:'FABRICATE', abilityDesc:'AMMO + ARMOR DROP'},
 ];
 const CHAR_BY_ID = Object.fromEntries(CHARACTERS.map(c=>[c.id,c]));
-let selectedCharId = 'convict';
+let selectedCharId = 'pilot';
 
 const AUGMENTS = [
   {id:'plate',  name:'KINETIC PLATING',     desc:'-20% damage taken'},
@@ -3405,7 +3422,7 @@ function newPlayer(){
     charId: ch.id,
     abilityCool: 0,
     cloakT: 0,
-    abilityCharges: ch.id==='convict'?2 : ch.id==='hunter'?3 : ch.id==='pilot'?2 : 1,
+    abilityCharges: ch.id==='hunter'?3 : ch.id==='pilot'?2 : 1,
     // BLANKS — Enter the Gungeon style screen-clearing item.
     // 2 starting blanks for everyone except the Pilot (3, scavenger).
     blanks: ch.id==='pilot' ? 3 : 2,
@@ -4022,8 +4039,8 @@ function entityCanMove(room, x, y, w, h, tableMode){
         if(x < p.x+p.w-1 && x+w > p.x+1 && y < p.y+p.h-1 && y+h > p.y+2) return false;
         continue;
       }
-      // chests block like solid props — opened or broken chests no longer block
-      if(p.type==='chest' && !p.opened && !p.broken){
+      // chests block like solid props — broken chests no longer block, but opened ones still do
+      if(p.type==='chest' && !p.broken){
         const cw = p.w||14, ch = p.h||12;
         if(x < p.x+cw && x+w > p.x && y < p.y+ch && y+h > p.y) return false;
         continue;
@@ -4147,17 +4164,23 @@ function swapWeapon(){
 }
 // Called from pickup paths. If slot 2 is empty, the picked-up weapon goes
 // straight to the stowed slot (so the player keeps their current gun out).
-// If both slots are full, the new weapon REPLACES the active one (mirrors
-// ETG behaviour where picking up a third gun drops the held one).
-function acquireWeapon(wid){
+// If both slots are full, the new weapon SWAPS with the currently equipped
+// weapon (slot 1), and the old gun is dropped on the floor at dropX/dropY.
+function acquireWeapon(wid, dropX, dropY){
   const wp = WEAPON_BY_ID[wid]; if(!wp) return;
   if(!player.weapon2){
     player.weapon2 = wid; player.mag2 = wp.mag; player.ammo2 = wp.mag;
     if(typeof spawnBanner === 'function') spawnBanner('STOWED · '+wp.name, 'TAB / SCROLL TO SWAP', 1.4);
   } else {
+    // Drop the currently equipped gun on the floor before swapping in the new one
+    const oldWid = player.weapon;
+    if(oldWid && dropX !== undefined && dropY !== undefined){
+      spawnWeaponPickup(dropX, dropY, oldWid);
+    }
     player.weapon = wid; player.mag = wp.mag; player.ammo = wp.mag;
     player.reloading = false; player.reloadT = 0;
-    if(typeof spawnBanner === 'function') spawnBanner('EQUIPPED · '+wp.name, '', 1.2);
+    const oldName = (oldWid && WEAPON_BY_ID[oldWid]) ? WEAPON_BY_ID[oldWid].name+' DROPPED' : '';
+    if(typeof spawnBanner === 'function') spawnBanner('EQUIPPED · '+wp.name, oldName, 1.2);
   }
 }
 
@@ -4194,10 +4217,12 @@ function finishTransition(){
   if(transitionDir==='e') dx=1;
   const nk = (r.x+dx)+','+(r.y+dy);
   if(dungeon[nk]){
+    savePickupsToRoom(curRoomKey);
     curRoomKey = nk;
     const nr = dungeon[nk];
     nr.visited = true;
     buildRoom(nr);
+    restorePickupsFromRoom(nr);
     runStats.rooms++;
     // place player on opposite side
     const cx = (ROOM_W-1)/2, cy = (ROOM_H-1)/2;
@@ -4624,7 +4649,7 @@ function enterHub(){
   // hub is a single safe room
   dungeon = { '0,0': { type:RT.START, doors:{e:true}, x:0, y:0, theme:0, sector:0, cleared:true, visited:true, entities:[], props:[
     {type:'pedestal', x: ROOM_PX_W/2-30, y: ROOM_PX_H/2-6, label:'DEPLOY ELEVATOR', action:'deploy'},
-    {type:'pedestal', x: ROOM_PX_W/2+18, y: ROOM_PX_H/2-6, label:'WEAPONS CACHE', action:'cache'},
+    {type:'chest', x: ROOM_PX_W/2+16, y: ROOM_PX_H/2-8, w:14, h:12, tier:'brown', isCache:true, opened:false},
     {type:'torch', x: 4*TILE, y: 8, frame:0},
     {type:'torch', x: 13*TILE, y: 8, frame:2},
     {type:'skull', x: 5*TILE, y: 7*TILE},
@@ -4973,9 +4998,27 @@ function updateRun(dt, isHub){
           spawnPickup('key', e.x-24, e.y, 1);
           spawnPickup('coin', e.x, e.y+12, 10);
           spawnPickup('heart', e.x+24, e.y, 1);
-          // Black chest — rarest tier, boss reward — spawn far from exit portal
-          const chestOffX = (e.x > ROOM_PX_W/2) ? -56 : 56;
-          r.props.push({type:'chest', x:e.x+chestOffX-7, y:e.y+20, w:14, h:12, tier:'black', opened:false, hp:30, maxHp:30});
+          // Black chest — rarest tier, boss reward — find safe floor position
+          {
+            let cx = e.x + ((e.x > ROOM_PX_W/2) ? -56 : 56) - 7;
+            let cy = e.y + 20;
+            cx = Math.max(2*TILE, Math.min(ROOM_PX_W - 3*TILE, cx));
+            cy = Math.max(2*TILE, Math.min(ROOM_PX_H - 3*TILE, cy));
+            // If the chosen tile is a wall, spiral outward to find a clear floor tile
+            let ctw = Math.floor(cx/TILE), cth = Math.floor(cy/TILE);
+            if(isWall(r,ctw,cth) || isWall(r,ctw+1,cth) || isWall(r,ctw,cth+1)){
+              let found = false;
+              outer: for(let rad=1; rad<=6; rad++){
+                for(let oy=-rad; oy<=rad; oy++) for(let ox=-rad; ox<=rad; ox++){
+                  if(Math.abs(ox)!==rad && Math.abs(oy)!==rad) continue;
+                  const ttx=ctw+ox, tty=cth+oy;
+                  if(ttx<1||tty<1||ttx+1>=ROOM_W||tty+1>=ROOM_H) continue;
+                  if(!isWall(r,ttx,tty) && !isWall(r,ttx+1,tty) && !isWall(r,ttx,tty+1)){ cx=ttx*TILE; cy=tty*TILE; found=true; break outer; }
+                }
+              }
+            }
+            r.props.push({type:'chest', x:cx, y:cy, w:14, h:12, tier:'black', opened:false, hp:30, maxHp:30});
+          }
           // any remaining boss entities (twin)?
           const otherBoss = r.entities.find(o=>o.isBoss);
           if(!otherBoss){
@@ -5250,20 +5293,26 @@ function updateRun(dt, isHub){
       const a = Math.atan2(player.y-p.y, player.x-p.x);
       p.x += Math.cos(a)*120*dt; p.y += Math.sin(a)*120*dt;
     }
-    // pickup radius — weapons require a closer step-on
-    const pickRadius = (p.kind === 'weapon') ? 9 : 8;
+    // pickup radius
+    const pickRadius = (p.kind === 'weapon') ? 12 : 8;
     if(d < pickRadius && (!p.pickupCooldown || p.pickupCooldown <= 0)){
+      if(p.kind === 'weapon'){
+        // Weapons require [E] to pick up; outline + prompt are shown in rendering
+        if(keys['e']){
+          keys['e'] = false;
+          const wpn = WEAPONS.find(w => w.id === p.wid);
+          if(wpn){
+            acquireWeapon(p.wid, p.x, p.y);
+            sfxPickup();
+            pickups.splice(i,1);
+          }
+        }
+        continue;
+      }
       if(p.kind==='coin'){ player.credits += p.amt; }
       else if(p.kind==='heart'){ player.hp = Math.min(player.maxHp, player.hp + p.amt); }
       else if(p.kind==='ammo'){ player.ammo = Math.min(player.mag, player.ammo + Math.ceil(player.mag/2)); if(player.ammo===0) player.ammo = player.mag; }
       else if(p.kind==='key'){ player.keys += p.amt; }
-      else if(p.kind==='weapon'){
-        const wpn = WEAPONS.find(w => w.id === p.wid);
-        if(wpn){
-          acquireWeapon(p.wid);
-          spawnBanner(wpn.name+' EQUIPPED', wpn.rarity+' · '+wpn.dmg+' DMG', 1.6);
-        }
-      }
       sfxPickup();
       pickups.splice(i,1); continue;
     }
@@ -5292,53 +5341,55 @@ function updateRun(dt, isHub){
       p.trail = p.trail || [];
       p.trail.push({x:p.x+p.w/2, y:p.y+p.h/2, life:0.35});
       if(p.trail.length > 8) p.trail.shift();
-      // attempt to move
-      const nx = p.x + p.vx*dt;
-      const ny = p.y + p.vy*dt;
-      // check walls/tables
       const cur = curRoom();
-      let blocked = false;
-      const corners = [[nx, ny],[nx+p.w-1, ny],[nx, ny+p.h-1],[nx+p.w-1, ny+p.h-1]];
-      for(const [cx,cy] of corners){
-        if(isWall(cur, Math.floor(cx/TILE), Math.floor(cy/TILE))){ blocked = true; break; }
-      }
-      if(!blocked){
-        for(const o of cur.props){
-          if(o===p || o.hp<=0 || o.broken) continue;
-          if(o.type==='table' && o.flipped===false) continue;
-          if(o.type==='torch' || o.type==='teleporter' || o.type==='skull' || o.type==='pedestal') continue;
-          if(nx < o.x+o.w && nx+p.w > o.x && ny < o.y+o.h && ny+p.h > o.y){ blocked = true; break; }
+      // Helper: is a given barrel bounding box blocked by walls or solid props?
+      const barrelBlocked = (bx, by) => {
+        const corners = [[bx,by],[bx+p.w-1,by],[bx,by+p.h-1],[bx+p.w-1,by+p.h-1]];
+        for(const [cx,cy] of corners){
+          if(isWall(cur, Math.floor(cx/TILE), Math.floor(cy/TILE))) return true;
         }
+        for(const o of cur.props){
+          if(o===p || o.broken) continue;
+          if(o.type==='torch'||o.type==='teleporter'||o.type==='skull') continue;
+          if(o.type==='chest' && o.opened) continue;
+          const ow=o.w||14, oh=o.h||14;
+          if(bx < o.x+ow && bx+p.w > o.x && by < o.y+oh && by+p.h > o.y) return true;
+        }
+        return false;
+      };
+      // ETG-style: move each axis independently — bounce off walls & props, NEVER break on them
+      const nx = p.x + p.vx*dt;
+      if(!barrelBlocked(nx, p.y)){
+        p.x = nx;
+      } else {
+        p.vx *= -0.65;
+        for(let k=0;k<4;k++) spawnPart(p.x+p.w/2, p.y+p.h/2, {vx:rand(-30,30),vy:rand(-20,20),life:0.22,c:'#7c4f2c',sz:1,fric:0.95});
       }
-      // ETG-style: player can step in front of a rolling barrel and stop it
-      if(!blocked && !player.dead){
-        const px = player.x - player.w/2, py = player.y - player.h/2;
-        if(nx < px+player.w && nx+p.w > px && ny < py+player.h && ny+p.h > py){
-          blocked = true;
-          // gentle nudge so player isn't stuck inside
+      const ny = p.y + p.vy*dt;
+      if(!barrelBlocked(p.x, ny)){
+        p.y = ny;
+      } else {
+        p.vy *= -0.65;
+        for(let k=0;k<4;k++) spawnPart(p.x+p.w/2, p.y+p.h/2, {vx:rand(-20,20),vy:rand(-30,30),life:0.22,c:'#7c4f2c',sz:1,fric:0.95});
+      }
+      // Player contact — barrel pushes player back, does NOT break
+      if(!player.dead){
+        const ppx = player.x - player.w/2, ppy = player.y - player.h/2;
+        if(p.x < ppx+player.w && p.x+p.w > ppx && p.y < ppy+player.h && p.y+p.h > ppy){
+          p.vx *= -0.5; p.vy *= -0.5;
           player.invul = Math.max(player.invul, 0.15);
           shakeCam(1);
         }
       }
-      if(blocked){
-        // smash on impact
-        p.hp = 0; p.broken = true; sfxKill();
-        for(let k=0;k<14;k++) spawnPart(p.x+p.w/2, p.y+p.h/2, {vx:rand(-90,90),vy:rand(-90,90),life:0.5,c:'#7c4f2c',sz:2,grav:240,fric:0.94});
-        if(Math.random()<0.7) spawnPickup('coin', p.x+p.w/2, p.y+p.h/2, 2);
-        if(Math.random()<0.25) spawnPickup('heart', p.x+p.w/2, p.y+p.h/2, 1);
-        shakeCam(2);
-        p.vx = p.vy = 0;
-        continue;
-      }
-      p.x = nx; p.y = ny;
-      // damage enemies in path
+      // damage enemies in path — barrel BREAKS only on enemy hit (ETG-style)
       for(const e of (cur.entities||[])){
         if(e.dead) continue;
         if(Math.abs(e.x - (p.x+p.w/2)) < e.w/2+p.w/2 && Math.abs(e.y - (p.y+p.h/2)) < e.h/2+p.h/2){
           damageEnemy(e, 18, p.vx, p.vy, 1.6);
           dmgNum(e.x, e.y-8, 18, '#f0b429');
-          // barrel breaks on enemy hit
           p.hp = 0; p.broken = true; sfxKill(); shakeCam(2);
+          if(Math.random()<0.7) spawnPickup('coin', p.x+p.w/2, p.y+p.h/2, 2);
+          if(Math.random()<0.25) spawnPickup('heart', p.x+p.w/2, p.y+p.h/2, 1);
           for(let k=0;k<14;k++) spawnPart(p.x+p.w/2, p.y+p.h/2, {vx:rand(-90,90),vy:rand(-90,90),life:0.5,c:'#7c4f2c',sz:2,grav:240,fric:0.94});
           break;
         }
@@ -5387,10 +5438,12 @@ function updateRun(dt, isHub){
               const pulse = ()=>{ for(let k=0;k<24;k++) spawnPart(player.x, player.y, {vx:rand(-160,160),vy:rand(-160,160),life:0.5,c:pulseCol,sz:2}); };
               pulse();
               sfxLockOpen();
+              savePickupsToRoom(fromKey);
               curRoomKey = destKey;
               const nr = dungeon[curRoomKey];
               nr.visited = true;
               if(!nr.props || nr.props.length===0) buildRoom(nr);
+              restorePickupsFromRoom(nr);
               // Place player: if returning, restore EXACT saved position; else land on dest pad
               let landed = false;
               if(wasReturn && savedReturnPos){
@@ -5441,33 +5494,38 @@ function updateRun(dt, isHub){
   for(const ch of (curRoom().props||[]).filter(p=>p.type==='chest')){
     if(!ch.opened && dist(player.x,player.y, ch.x+7, ch.y+6)<14 && keys['e']){
       keys['e']=false; ch.opened=true; sfxPickup();
-      // Loot quality scales with tier — better chest, better gun + more coins.
-      // brown < blue < green < red < black < rainbow.
-      const tier = ch.tier || 'brown';
-      const tierIdx = ({brown:0, blue:1, green:2, red:3, black:4, rainbow:5})[tier] || 0;
-      // black chests: always drop a legendary exclusive weapon
-      let wpn;
-      if(tier === 'black'){
-        const legendaries = WEAPONS.filter(w=>w.exclusive);
-        wpn = legendaries[irand(0, legendaries.length-1)];
+      // ── WEAPONS CACHE (hub one-time chest) ──────────────────────────────────
+      if(ch.isCache){
+        const cachePool = WEAPONS.filter(w=>!w.exclusive);
+        const wpn = cachePool[irand(0, cachePool.length-1)];
+        spawnWeaponPickup(ch.x+7, ch.y + (ch.h||12) + 10, wpn.id);
+        spawnBanner('CACHE OPENED', wpn.name+' · Press [E] to pick up', 2.4);
+        spawnPickup('coin', ch.x+7, ch.y, 3);
       } else {
-        const nonExclusive = WEAPONS.filter(w=>!w.exclusive);
-        const wMin = Math.min(nonExclusive.length-1, 2 + tierIdx);
-        wpn = nonExclusive[irand(wMin, nonExclusive.length-1)];
-      }
-      // DROP the gun on the FLOOR as a pickup — player chooses to grab it
-      // (Enter-the-Gungeon style). Walking over it equips it; old gun stays.
-      spawnWeaponPickup(ch.x+7, ch.y+10, wpn.id);
-      spawnBanner(wpn.name+' DROPPED', wpn.rarity+' · '+(wpn.dmg)+' DMG · Step on it to pick up', 2.4);
-      // coin reward scales with tier; rainbow chests also drop a heart
-      const coinAmt = 6 + tierIdx*4;
-      spawnPickup('coin', ch.x+7, ch.y, coinAmt);
-      if(tier === 'black' || tier === 'rainbow'){
-        spawnPickup('heart', ch.x+7, ch.y+6, 1);
-      }
-      if(tier === 'rainbow'){
-        // bonus blank
-        player.blanks = Math.min(player.maxBlanks, player.blanks + 1);
+        // Loot quality scales with tier — better chest, better gun + more coins.
+        // brown < blue < green < red < black < rainbow.
+        const tier = ch.tier || 'brown';
+        const tierIdx = ({brown:0, blue:1, green:2, red:3, black:4, rainbow:5})[tier] || 0;
+        // black chests: always drop a legendary exclusive weapon
+        let wpn;
+        if(tier === 'black'){
+          const legendaries = WEAPONS.filter(w=>w.exclusive);
+          wpn = legendaries[irand(0, legendaries.length-1)];
+        } else {
+          const nonExclusive = WEAPONS.filter(w=>!w.exclusive);
+          const wMin = Math.min(nonExclusive.length-1, 2 + tierIdx);
+          wpn = nonExclusive[irand(wMin, nonExclusive.length-1)];
+        }
+        spawnWeaponPickup(ch.x+7, ch.y+10, wpn.id);
+        spawnBanner(wpn.name+' DROPPED', wpn.rarity+' · '+(wpn.dmg)+' DMG · Press [E] to pick up', 2.4);
+        const coinAmt = 6 + tierIdx*4;
+        spawnPickup('coin', ch.x+7, ch.y, coinAmt);
+        if(tier === 'black' || tier === 'rainbow'){
+          spawnPickup('heart', ch.x+7, ch.y+6, 1);
+        }
+        if(tier === 'rainbow'){
+          player.blanks = Math.min(player.maxBlanks, player.blanks + 1);
+        }
       }
     }
   }
@@ -5479,13 +5537,6 @@ function updateRun(dt, isHub){
         if(ped.action==='deploy'){
           spawnBanner('DEPLOYING TO SECTOR 01', '', 1.2);
           setTimeout(()=>{ startRun(1); }, 800);
-        } else if(ped.action==='cache'){
-          // cycle weapon
-          const idx = WEAPONS.findIndex(w=>w.id===player.weapon);
-          const next = WEAPONS[(idx+1)%WEAPONS.length];
-          player.weapon = next.id; player.mag = next.mag; player.ammo = next.mag;
-          spawnBanner('LOADOUT SET', next.name, 1.6);
-          sfxPickup();
         }
       }
     }
@@ -5607,6 +5658,21 @@ function hurtPlayer(dmg, kx, ky){
 
 function spawnPickup(kind, x, y, amt){
   pickups.push({kind, x, y, amt, life: 30, vx:rand(-20,20), vy:rand(-30,-10)});
+}
+// Save all live pickups into the room so they survive a room transition.
+// Life is set to Infinity so stored pickups never expire on re-entry.
+function savePickupsToRoom(roomKey){
+  const room = dungeon[roomKey];
+  if(!room) return;
+  room.savedPickups = pickups.map(p=>Object.assign({}, p, {life: Infinity, vx:0, vy:0}));
+}
+// Pull stored pickups back into the live array when re-entering a room.
+function restorePickupsFromRoom(room){
+  pickups.length = 0;
+  if(room.savedPickups && room.savedPickups.length){
+    for(const p of room.savedPickups) pickups.push(p);
+    room.savedPickups = [];
+  }
 }
 // WEAPON pickups don't expire and don't get magneted — the player has to walk
 // onto them to swap weapons. wid is a string id from the WEAPONS table.
@@ -6204,222 +6270,406 @@ function renderHallway(){
 
 function renderBoot(){
   const t = performance.now()/1000;
-  ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
-  // scanline overlay
-  ctx.fillStyle = 'rgba(0,0,0,0.30)';
-  for(let sy=0;sy<H;sy+=2) ctx.fillRect(0,sy,W,1);
-  if(bootTime > 0.15){
-    // red chromatic-aberration glitch clone
-    const gx = Math.floor(Math.sin(t*19)*2);
-    ctx.globalAlpha = 0.45;
-    drawText('CYCLOPS DUNGEON REFORGED', W/2-gx*2, H/2-9, true, 11, '#00d4f0');
-    ctx.globalAlpha = 1.0;
-    drawText('CYCLOPS DUNGEON REFORGED', W/2+gx, H/2-9, true, 11, '#d7263d');
+  // ── DEEP DUNGEON BASE ─────────────────────────────────────────────────────
+  ctx.fillStyle = '#04030a'; ctx.fillRect(0,0,W,H);
+
+  // ── PERSPECTIVE CORRIDOR FLOOR ────────────────────────────────────────────
+  // Vanishing point in upper-center; trapezoid stone rows recede into it
+  const vanX = W/2, vanY = Math.floor(H*0.38);
+  const floorBase = Math.floor(H*0.52);
+  const ROWS = 10;
+  for(let r=0; r<ROWS; r++){
+    const t0 = r/ROWS, t1 = (r+1)/ROWS;
+    const y0 = vanY + (floorBase - vanY)*t0 + (H - floorBase)*t0;
+    const y1 = vanY + (floorBase - vanY)*t1 + (H - floorBase)*t1;
+    const half0 = (vanX * (y0 - vanY) / (H - vanY));
+    const half1 = (vanX * (y1 - vanY) / (H - vanY));
+    const shade = r%2===0 ? '#161220' : '#120f1c';
+    ctx.fillStyle = shade;
+    ctx.beginPath();
+    ctx.moveTo(vanX-half0, y0); ctx.lineTo(vanX+half0, y0);
+    ctx.lineTo(vanX+half1, y1); ctx.lineTo(vanX-half1, y1);
+    ctx.closePath(); ctx.fill();
+    // Mortar seam
+    ctx.fillStyle = '#08060e';
+    ctx.fillRect(Math.floor(vanX-half0), Math.floor(y0), Math.ceil(half0*2), 1);
+    // Vertical grout lines at 3rds
+    for(const frac of [1/3, 2/3]){
+      const gx0 = vanX - half0 + half0*2*frac;
+      const gx1 = vanX - half1 + half1*2*frac;
+      ctx.fillStyle = '#08060e';
+      ctx.beginPath();
+      ctx.moveTo(Math.floor(gx0), Math.floor(y0));
+      ctx.lineTo(Math.floor(gx1), Math.floor(y1));
+      ctx.lineTo(Math.floor(gx1)+1, Math.floor(y1));
+      ctx.lineTo(Math.floor(gx0)+1, Math.floor(y0));
+      ctx.closePath(); ctx.fill();
+    }
   }
+
+  // ── BACK WALL (far end) ───────────────────────────────────────────────────
+  ctx.fillStyle = '#0c0b18';
+  ctx.fillRect(0, 0, W, Math.floor(H*0.52)+2);
+  // Stone brick pattern
+  const bW=22, bH=9;
+  for(let by=0; by<Math.floor(H*0.52); by+=bH){
+    const off=(Math.floor(by/bH)%2)*11;
+    for(let bx=-off; bx<W; bx+=bW){
+      ctx.fillStyle='#13121e'; ctx.fillRect(bx+1,by+1,bW-2,bH-2);
+      ctx.fillStyle='rgba(255,255,255,0.022)'; ctx.fillRect(bx+1,by+1,bW-2,1);
+      ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.fillRect(bx+1,by+bH-2,bW-2,1);
+    }
+  }
+  // Floor/wall ledge
+  ctx.fillStyle='#1a1828'; ctx.fillRect(0,Math.floor(H*0.52),W,3);
+  ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(0,Math.floor(H*0.52),W,1);
+
+  // ── SIDE WALLS ────────────────────────────────────────────────────────────
+  const sw = Math.floor(W*0.16);
+  ctx.fillStyle='#0b0a16'; ctx.fillRect(0,0,sw,H); ctx.fillRect(W-sw,0,sw,H);
+  for(let bi=0;bi<20;bi++){
+    const col=bi%2, row=Math.floor(bi/2), bw2=Math.floor(sw/2);
+    const bxi=col*bw2, byi=row*20+col*10;
+    ctx.fillStyle='rgba(16,13,26,0.9)';
+    ctx.fillRect(bxi+1,byi+1,bw2-2,17); ctx.fillRect(W-sw+bxi+1,byi+1,bw2-2,17);
+    ctx.fillStyle='rgba(255,255,255,0.02)';
+    ctx.fillRect(bxi+1,byi+1,bw2-2,1); ctx.fillRect(W-sw+bxi+1,byi+1,bw2-2,1);
+  }
+  ctx.fillStyle='#1c1830'; ctx.fillRect(sw-1,0,2,H); ctx.fillRect(W-sw-1,0,2,H);
+  ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.fillRect(sw,0,1,H); ctx.fillRect(W-sw-1,0,1,H);
+
+  // ── TORCHES ───────────────────────────────────────────────────────────────
+  const torchY = Math.floor(H*0.35);
+  for(const [tgx, tside] of [[sw,1],[W-sw,-1]]){
+    const flk  = Math.sin(t*9.2+tgx*0.01)*0.5+0.5;
+    const flk2 = Math.sin(t*13.8+tgx*0.02)*0.5+0.5;
+    const gr = ctx.createRadialGradient(tgx,torchY,1,tgx,torchY,Math.floor(W*0.4));
+    gr.addColorStop(0,`rgba(255,158,36,${0.30+flk*0.14})`);
+    gr.addColorStop(0.18,`rgba(200,88,14,${0.13+flk*0.06})`);
+    gr.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    const bx=tgx+tside*2;
+    ctx.fillStyle='#4a3018'; ctx.fillRect(bx-2,torchY-3,4,8);
+    ctx.fillStyle='#3a2210'; ctx.fillRect(bx-3,torchY+2,6,3);
+    ctx.fillStyle=`rgba(255,228,72,${0.9+flk*0.1})`; ctx.fillRect(bx-1,torchY-9,2,5);
+    ctx.fillStyle=`rgba(255,138,18,${0.7+flk2*0.3})`; ctx.fillRect(bx-1,torchY-12,2,4);
+    ctx.fillStyle=`rgba(255,58,8,${0.4+flk*0.3})`; ctx.fillRect(bx,torchY-14,1,3);
+    ctx.fillStyle=`rgba(255,255,130,${0.55+flk*0.4})`; ctx.fillRect(bx,torchY-8,1,3);
+  }
+
+  // ── DOOR ARCH (center, far wall) ──────────────────────────────────────────
+  const archX=Math.floor(W/2-16), archY=Math.floor(H*0.24), archW=32, archH=26;
+  ctx.fillStyle='#060510'; ctx.fillRect(archX,archY,archW,archH);
+  // Arch stones
+  ctx.fillStyle='#1a1830';
+  for(let s=0;s<5;s++){
+    const sx=archX-2+s*9;
+    ctx.fillRect(sx,archY-4,8,5);
+  }
+  ctx.fillStyle='rgba(255,255,255,0.04)';
+  for(let s=0;s<5;s++) ctx.fillRect(archX-1+s*9,archY-4,8,1);
+  // Door glow (light from beyond)
+  const dgrd=ctx.createRadialGradient(W/2,archY+archH/2,1,W/2,archY+archH/2,archW);
+  dgrd.addColorStop(0,`rgba(60,40,100,${0.18+Math.sin(t*1.3)*0.06})`);
+  dgrd.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=dgrd; ctx.fillRect(archX-10,archY-6,archW+20,archH+16);
+  // Door frame outline
+  ctx.strokeStyle='#2a2440'; ctx.lineWidth=1;
+  ctx.strokeRect(archX+0.5,archY+0.5,archW-1,archH-1);
+
+  // ── VIGNETTE ─────────────────────────────────────────────────────────────
+  const vig=ctx.createRadialGradient(W/2,H/2,H*0.06,W/2,H/2,H*0.9);
+  vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,0.9)');
+  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+
+  // ── SCANLINES ────────────────────────────────────────────────────────────
+  ctx.fillStyle='rgba(0,0,0,0.18)';
+  for(let sy=0;sy<H;sy+=2) ctx.fillRect(0,sy,W,1);
+
+  // ── TITLE — ETG-style chunky pixel logo ──────────────────────────────────
+  if(bootTime > 0.12){
+    const gx = Math.floor(Math.sin(t*17)*1.5);
+    // Chromatic aberration cyan layer
+    ctx.globalAlpha=0.32;
+    drawText('CYCLOPS DUNGEON', W/2+gx*2, H/2-20, true, 14, '#00d0ff');
+    drawText('REFORGED',        W/2+gx*2, H/2-1,  true, 10, '#00d0ff');
+    // Chromatic aberration red layer
+    drawText('CYCLOPS DUNGEON', W/2-gx,   H/2-20, true, 14, '#ff2040');
+    drawText('REFORGED',        W/2-gx,   H/2-1,  true, 10, '#ff2040');
+    ctx.globalAlpha=1.0;
+    // Drop shadow
+    ctx.globalAlpha=0.6;
+    drawText('CYCLOPS DUNGEON', W/2+2, H/2-18, true, 14, '#160408');
+    drawText('REFORGED',        W/2+2, H/2+1,  true, 10, '#0e0210');
+    ctx.globalAlpha=1.0;
+    // Main title — warm gold top word, red-orange second word, amber subtitle
+    drawText('CYCLOPS DUNGEON', W/2, H/2-20, true, 14, '#f0c840');
+    drawText('REFORGED',        W/2, H/2-1,  true, 10, '#e05828');
+    // Subtle shimmer on subtitle
+    ctx.globalAlpha=0.12+Math.sin(t*3)*0.06;
+    drawText('REFORGED',        W/2, H/2-1,  true, 10, '#ffd060');
+    ctx.globalAlpha=1.0;
+    // Decorative rule
+    const ry=H/2+12;
+    ctx.fillStyle='#1e1418'; ctx.fillRect(W/2-72,ry,144,1);
+    ctx.fillStyle='#e05828'; ctx.fillRect(W/2-20,ry-1,40,3);
+    ctx.fillStyle='rgba(240,200,64,0.55)'; ctx.fillRect(W/2-18,ry,36,1);
+    ctx.fillStyle='#1e1418'; ctx.fillRect(W/2-72,ry+2,144,1);
+    ctx.fillStyle='#b05020'; ctx.fillRect(W/2-74,ry,2,3); ctx.fillRect(W/2+72,ry,2,3);
+  }
+
+  // ── PRESS ANY KEY ────────────────────────────────────────────────────────
   if(bootTime > 0.5 && Math.floor(t*2)%2===0)
-    drawText('PRESS ANY KEY OR CLICK', W/2, H-28, true, 6, '#555');
-  drawText('A REN PRODUCTION', W/2, H-13, true, 5, '#2a2a2a');
+    drawText('PRESS ANY KEY OR CLICK TO ENTER', W/2, H-28, true, 6, '#907848');
+
+  drawText('A REN PRODUCTION', W/2, H-13, true, 5, '#221818');
 }
 
 function renderMenu(){
   const t = (performance.now()/1000) || 0;
   const pulse = (Math.sin(t*2.4)+1)*0.5;
 
-  // ── BASE — deep dungeon black ─────────────────────────────────────────────
-  ctx.fillStyle = '#05040a'; ctx.fillRect(0,0,W,H);
+  // ── BASE ─────────────────────────────────────────────────────────────────
+  ctx.fillStyle = '#04030b'; ctx.fillRect(0,0,W,H);
 
-  // ── STONE FLOOR TILES (bottom 60 %) ───────────────────────────────────────
-  const tSz = 12, flTop = Math.floor(H*0.42);
-  for(let ty=flTop; ty<H; ty+=tSz){
-    for(let tx=0; tx<W; tx+=tSz){
-      const alt = ((Math.floor(tx/tSz)+Math.floor(ty/tSz))%2===0);
-      ctx.fillStyle = alt ? '#17111e' : '#1b1424';
-      ctx.fillRect(tx+1,ty+1,tSz-2,tSz-2);
-      ctx.fillStyle = '#0b0810';
-      ctx.fillRect(tx,ty,tSz,1); ctx.fillRect(tx,ty,1,tSz);
+  // ── BACK WALL — stone brickwork ──────────────────────────────────────────
+  const wallFarY = Math.floor(H*0.44);
+  ctx.fillStyle = '#0c0b17'; ctx.fillRect(0,0,W,wallFarY+2);
+  const bW=22, bH=9;
+  for(let by=0; by<wallFarY+2; by+=bH){
+    const off=(Math.floor(by/bH)%2)*11;
+    for(let bx=-off; bx<W; bx+=bW){
+      const v = 0.88+Math.sin(bx*0.31+by*0.53)*0.12;
+      ctx.fillStyle=`rgba(${Math.floor(16*v)},${Math.floor(14*v)},${Math.floor(24*v)},1)`;
+      ctx.fillRect(bx+1,by+1,bW-2,bH-2);
+      ctx.fillStyle='rgba(255,255,255,0.024)'; ctx.fillRect(bx+1,by+1,bW-2,1);
+      ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fillRect(bx+1,by+bH-2,bW-2,1);
     }
   }
-  // slight mortar depth under divider
-  ctx.fillStyle = '#0b0810'; ctx.fillRect(0,flTop,W,1);
+  // Stone ledge capping the wall
+  ctx.fillStyle='#1c1a2c'; ctx.fillRect(0,wallFarY,W,4);
+  ctx.fillStyle='rgba(255,255,255,0.045)'; ctx.fillRect(0,wallFarY,W,1);
+  ctx.fillStyle='#080610'; ctx.fillRect(0,wallFarY+4,W,2);
 
-  // ── DARK STONE SIDE WALLS ─────────────────────────────────────────────────
-  const wallW = Math.floor(W*0.13);
-  ctx.fillStyle = '#0d0a14';
-  ctx.fillRect(0,0,wallW,H); ctx.fillRect(W-wallW,0,wallW,H);
-  // stone bricks on side walls
-  for(let bi=0;bi<12;bi++){
-    const bx = (bi%2)*Math.floor(wallW/2);
-    const byi = Math.floor(bi/2)*22 + (bi%2)*11;
-    ctx.fillStyle = 'rgba(40,28,54,0.5)';
-    ctx.fillRect(bx+2, byi+2, Math.floor(wallW/2)-4, 17);
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    ctx.fillRect(bx+2, byi+2, Math.floor(wallW/2)-4, 2);
-    ctx.fillRect(W-wallW+bx+2, byi+2, Math.floor(wallW/2)-4, 17);
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    ctx.fillRect(W-wallW+bx+2, byi+2, Math.floor(wallW/2)-4, 2);
+  // ── FLOOR — top-down stone tiles ─────────────────────────────────────────
+  const tSz=11, flTop=wallFarY+6;
+  for(let ty=flTop; ty<H; ty+=tSz){
+    for(let tx=0; tx<W; tx+=tSz){
+      const alt=((Math.floor(tx/tSz)+Math.floor(ty/tSz))%2===0);
+      ctx.fillStyle=alt?'#17152200':'#13111d';
+      ctx.fillStyle=alt?'#171522':'#13111d';
+      ctx.fillRect(tx+1,ty+1,tSz-2,tSz-2);
+      ctx.fillStyle='#07060e'; ctx.fillRect(tx,ty,tSz,1); ctx.fillRect(tx,ty,1,tSz);
+    }
   }
-  // wall/floor divider ridge
-  ctx.fillStyle = '#2a1c38'; ctx.fillRect(wallW-1,0,2,H);
-  ctx.fillRect(W-wallW-1,0,2,H);
+  // Subtle depth gradient on floor
+  const flGrd=ctx.createLinearGradient(0,flTop,0,H);
+  flGrd.addColorStop(0,'rgba(0,0,0,0.45)'); flGrd.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=flGrd; ctx.fillRect(0,flTop,W,H-flTop);
 
-  // ── TORCH GLOW (both walls, animated) ────────────────────────────────────
-  const tFlicker = 0.13 + pulse*0.09;
-  const torchLY = Math.floor(H*0.34), torchRY = torchLY;
-  for(const [tgx,tgy] of [[wallW, torchLY],[W-wallW, torchRY]]){
-    const grd = ctx.createRadialGradient(tgx,tgy,1,tgx,tgy,Math.floor(W*0.38));
-    grd.addColorStop(0, `rgba(255,168,48,${tFlicker+0.05})`);
-    grd.addColorStop(0.18, `rgba(220,100,20,${tFlicker*0.6})`);
-    grd.addColorStop(1, 'rgba(140,50,0,0)');
-    ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+  // ── SIDE WALLS ────────────────────────────────────────────────────────────
+  const wallW=Math.floor(W*0.155);
+  ctx.fillStyle='#0a0916'; ctx.fillRect(0,0,wallW,H); ctx.fillRect(W-wallW,0,wallW,H);
+  // Brick rows on side walls
+  for(let bi=0;bi<22;bi++){
+    const col=bi%2, row=Math.floor(bi/2), bw2=Math.floor(wallW/2);
+    const bxi=col*bw2, byi=row*20+col*10;
+    ctx.fillStyle='rgba(14,11,22,0.92)';
+    ctx.fillRect(bxi+1,byi+1,bw2-2,17); ctx.fillRect(W-wallW+bxi+1,byi+1,bw2-2,17);
+    ctx.fillStyle='rgba(255,255,255,0.02)';
+    ctx.fillRect(bxi+1,byi+1,bw2-2,1); ctx.fillRect(W-wallW+bxi+1,byi+1,bw2-2,1);
   }
-  // torch brackets (tiny pixel art)
-  for(const [tgx] of [[wallW],[W-wallW]]){
-    const tx0 = tgx-(tgx===wallW?6:2);
-    ctx.fillStyle='#5a4020'; ctx.fillRect(tx0,torchLY-5,4,9);
-    ctx.fillStyle='#f0b429'; ctx.fillRect(tx0+1,torchLY-8,2,4);
-    const flicker = Math.sin(t*9.3+tgx)*0.5+0.5;
-    ctx.fillStyle=`rgba(255,220,80,${0.7+flicker*0.3})`;
-    ctx.fillRect(tx0+1,torchLY-10,2,2);
-    ctx.fillStyle=`rgba(255,100,20,${0.4+flicker*0.4})`;
-    ctx.fillRect(tx0,torchLY-11,4,2);
+  // Wall/room dividers — highlighted seam
+  ctx.fillStyle='#201c34'; ctx.fillRect(wallW-1,0,2,H); ctx.fillRect(W-wallW-1,0,2,H);
+  ctx.fillStyle='rgba(255,255,255,0.035)'; ctx.fillRect(wallW,0,1,H); ctx.fillRect(W-wallW-1,0,1,H);
+
+  // ── DOOR ARCH (center of far wall) ───────────────────────────────────────
+  const archW=36, archH=28, archX=Math.floor(W/2-archW/2), archY=Math.floor(wallFarY-archH);
+  ctx.fillStyle='#050410'; ctx.fillRect(archX,archY,archW,archH);
+  // Arch keystone blocks
+  ctx.fillStyle='#1e1c30';
+  for(let s=0;s<5;s++) ctx.fillRect(archX-3+s*9,archY-5,8,5);
+  ctx.fillStyle='rgba(255,255,255,0.035)';
+  for(let s=0;s<5;s++) ctx.fillRect(archX-3+s*9,archY-5,8,1);
+  // Mystical glow from within the door
+  const dgrd=ctx.createRadialGradient(W/2,archY+archH*0.6,1,W/2,archY+archH*0.5,archW*0.9);
+  dgrd.addColorStop(0,`rgba(70,48,120,${0.22+Math.sin(t*1.5)*0.07})`);
+  dgrd.addColorStop(0.5,`rgba(40,20,80,${0.1+Math.sin(t*1.2)*0.04})`);
+  dgrd.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=dgrd; ctx.fillRect(archX-12,archY-8,archW+24,archH+20);
+  ctx.strokeStyle='#2e2848'; ctx.lineWidth=1;
+  ctx.strokeRect(archX+0.5,archY+0.5,archW-1,archH-1);
+
+  // ── TORCHES (both sides of far wall) ─────────────────────────────────────
+  const torchY=Math.floor(H*0.28);
+  for(const [tgx, tside] of [[wallW,1],[W-wallW,-1]]){
+    const flk  = Math.sin(t*8.8+tgx*0.01)*0.5+0.5;
+    const flk2 = Math.sin(t*14.1+tgx*0.013)*0.5+0.5;
+    const flk3 = Math.sin(t*6.3+tgx*0.007)*0.5+0.5;
+    // Warm radial glow
+    const gr=ctx.createRadialGradient(tgx,torchY,1,tgx,torchY,Math.floor(W*0.44));
+    gr.addColorStop(0,`rgba(255,155,34,${0.28+flk*0.13})`);
+    gr.addColorStop(0.14,`rgba(200,85,12,${0.11+flk*0.06})`);
+    gr.addColorStop(0.4,`rgba(140,50,0,${0.04+flk3*0.03})`);
+    gr.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+    // Wall sconce bracket
+    const bx=tgx+tside*3;
+    ctx.fillStyle='#4e3415'; ctx.fillRect(bx-2,torchY-2,4,9);
+    ctx.fillStyle='#3a2410'; ctx.fillRect(bx-3,torchY+5,6,3);
+    ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fillRect(bx-2,torchY-2,4,1);
+    // Flame — layered for depth
+    ctx.fillStyle=`rgba(255,232,70,${0.92+flk*0.08})`; ctx.fillRect(bx-1,torchY-11,2,6);
+    ctx.fillStyle=`rgba(255,145,18,${0.75+flk2*0.25})`; ctx.fillRect(bx-1,torchY-14,2,5);
+    ctx.fillStyle=`rgba(255,60,10,${0.45+flk*0.3})`; ctx.fillRect(bx,torchY-16,1,3);
+    ctx.fillStyle=`rgba(255,255,150,${0.6+flk*0.4})`; ctx.fillRect(bx,torchY-10,1,4);
+    // Tiny ember spark
+    if(flk2>0.7){ ctx.fillStyle='rgba(255,200,60,0.6)'; ctx.fillRect(bx+tside,torchY-17,1,1); }
+  }
+
+  // ── FLOATING DUST & EMBERS ───────────────────────────────────────────────
+  for(let pi=0;pi<30;pi++){
+    const px=(pi*71+t*14*(pi%2===0?1:-0.6))%W;
+    const py=flTop+((pi*53+t*6*(0.3+pi*0.055))%(H-flTop));
+    ctx.fillStyle=`rgba(200,155,75,${0.05+Math.sin(t*2.1+pi)*0.03})`;
+    ctx.fillRect(Math.floor(px),Math.floor(py),1,1);
+  }
+  for(let ei=0;ei<14;ei++){
+    const et=((t*0.65+ei*0.5)%2.5);
+    const tgxE = ei<7 ? wallW : W-wallW;
+    const epx=tgxE+Math.sin(t*2.1+ei)*9;
+    const epy=torchY-et*28-ei*4;
+    if(epy<0||epy>torchY) continue;
+    const ea=(1-et/2.5)*0.45;
+    ctx.fillStyle=`rgba(255,165,36,${ea})`; ctx.fillRect(Math.floor(epx),Math.floor(epy),1,1);
   }
 
   // ── VIGNETTE ─────────────────────────────────────────────────────────────
-  const vig = ctx.createRadialGradient(W/2,H/2,H*0.12,W/2,H/2,H*0.88);
-  vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,0.82)');
+  const vig=ctx.createRadialGradient(W/2,H/2,H*0.09,W/2,H/2,H*0.92);
+  vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,0.88)');
   ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
 
   // ── SCANLINES ────────────────────────────────────────────────────────────
-  ctx.fillStyle='rgba(0,0,0,0.16)';
+  ctx.fillStyle='rgba(0,0,0,0.13)';
   for(let sy=0;sy<H;sy+=2) ctx.fillRect(0,sy,W,1);
 
-  // ── FLOATING DUST PARTICLES ───────────────────────────────────────────────
-  for(let pi=0;pi<22;pi++){
-    const px = (pi*79+t*22*(pi%3===0?1.2:-0.8))%W;
-    const py = flTop + ((pi*53+t*9*(0.4+pi*0.07))%(H-flTop));
-    ctx.fillStyle=`rgba(200,150,80,${0.06+Math.sin(t*1.8+pi)*0.04})`;
-    ctx.fillRect(Math.floor(px),Math.floor(py),1,1);
-  }
-
-  // ── CYCLOPS EYE LOGO ─────────────────────────────────────────────────────
-  const ex=W/2, ey=38, eRx=28, eRy=16;
-  // glow halo behind eye
-  const eyeG=ctx.createRadialGradient(ex,ey,eRy*0.2,ex,ey,eRx*2.4);
-  eyeG.addColorStop(0,`rgba(180,20,30,${0.22+pulse*0.12})`);
-  eyeG.addColorStop(0.5,`rgba(80,0,15,${0.10+pulse*0.06})`);
-  eyeG.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=eyeG; ctx.fillRect(ex-eRx*2.6,ey-eRy*3,eRx*5.2,eRy*6);
-  // sclera
-  ctx.fillStyle='#c8bec0';
-  ctx.beginPath(); ctx.ellipse(ex,ey,eRx,eRy,0,0,Math.PI*2); ctx.fill();
-  // eyelid shadow top/bottom
-  ctx.fillStyle='rgba(0,0,0,0.28)';
-  ctx.beginPath(); ctx.ellipse(ex,ey-eRy*0.55,eRx*0.92,eRy*0.5,0,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(ex,ey+eRy*0.55,eRx*0.92,eRy*0.5,0,0,Math.PI*2); ctx.fill();
-  // iris
-  const iR=eRy*0.72;
-  ctx.fillStyle='#1a3040'; ctx.beginPath(); ctx.arc(ex,ey,iR,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#0d1e2a'; ctx.beginPath(); ctx.arc(ex,ey,iR*0.78,0,Math.PI*2); ctx.fill();
-  // subtle iris ring highlight
-  ctx.strokeStyle='rgba(40,100,140,0.6)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.arc(ex,ey,iR*0.88,0,Math.PI*2); ctx.stroke();
-  // pupil — slow tracking
-  const pupX=ex+Math.sin(t*0.35)*3.5, pupY=ey+Math.cos(t*0.28)*2;
-  ctx.fillStyle='#040206'; ctx.beginPath(); ctx.arc(pupX,pupY,iR*0.46,0,Math.PI*2); ctx.fill();
-  // pupil shine (upper-left catch-light)
-  ctx.fillStyle='rgba(255,255,255,0.72)'; ctx.fillRect(Math.floor(pupX-iR*0.14),Math.floor(pupY-iR*0.26),Math.ceil(iR*0.14),Math.ceil(iR*0.14));
-  // eyelid outline
-  ctx.strokeStyle='#2a1820'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.ellipse(ex,ey,eRx,eRy,0,0,Math.PI*2); ctx.stroke();
-  // eyelash ticks (top)
-  ctx.strokeStyle='rgba(30,20,28,0.9)'; ctx.lineWidth=1;
-  for(let li=-3;li<=3;li++){
-    const lx=ex+li*(eRx/4); const la=Math.asin(Math.max(-1,Math.min(1,(lx-ex)/eRx)));
-    const ly=ey-Math.cos(la)*eRy;
-    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+li*0.3,ly-3); ctx.stroke();
-  }
-
-  // ── TITLE ─────────────────────────────────────────────────────────────────
-  const titY = 62;
-  // drop shadow layer
-  ctx.globalAlpha=0.55;
-  drawText('CYCLOPS',   W/2+2, titY+2,   true, 18, '#3a0510');
-  drawText('DUNGEON',   W/2+2, titY+22+2,true, 18, '#3a0510');
-  drawText('REFORGED',  W/2+2, titY+38+2,true, 10, '#2a0a10');
+  // ── TITLE LOGO — ETG-inspired ─────────────────────────────────────────────
+  const titY=8;
+  // Title area glow
+  const titGrd=ctx.createRadialGradient(W/2,titY+20,2,W/2,titY+20,100);
+  titGrd.addColorStop(0,`rgba(220,155,10,${0.16+pulse*0.09})`);
+  titGrd.addColorStop(0.5,`rgba(180,80,8,${0.07+pulse*0.04})`);
+  titGrd.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=titGrd; ctx.fillRect(W/2-105,titY-6,210,54);
+  // Drop shadow layer
+  ctx.globalAlpha=0.65;
+  drawText('CYCLOPS',   W/2+2, titY+2,    true, 16, '#120206');
+  drawText('DUNGEON',   W/2+2, titY+20+2, true, 16, '#120206');
+  drawText('REFORGED',  W/2+2, titY+38+2, true, 9,  '#0e0206');
   ctx.globalAlpha=1.0;
-  // main title
-  drawText('CYCLOPS',   W/2, titY,    true, 18, '#f0f0f0');
-  drawText('DUNGEON',   W/2, titY+22, true, 18, '#d7263d');
-  // accent glow pass on red word
-  ctx.globalAlpha=0.18+pulse*0.12;
-  drawText('DUNGEON', W/2, titY+22, true, 18, '#ff8080');
+  // 1px outline pass
+  ctx.globalAlpha=0.75;
+  for(const [ox,oy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){
+    drawText('CYCLOPS',  W/2+ox, titY+oy,    true, 16, '#2a1204');
+    drawText('DUNGEON',  W/2+ox, titY+20+oy, true, 16, '#2a0804');
+    drawText('REFORGED', W/2+ox, titY+38+oy, true, 9,  '#220604');
+  }
   ctx.globalAlpha=1.0;
-  drawText('REFORGED',  W/2, titY+38, true, 10, '#c87070');
-  // decorative rule under title
-  const ruleY=titY+52;
-  ctx.fillStyle='#3a1520'; ctx.fillRect(W/2-70,ruleY,140,1);
-  ctx.fillStyle='#d7263d'; ctx.fillRect(W/2-18,ruleY-1,36,3);
-  ctx.fillStyle='#3a1520'; ctx.fillRect(W/2-70,ruleY+2,140,1);
+  // Main title — warm gold / ETG red-orange / amber
+  drawText('CYCLOPS',   W/2, titY,    true, 16, '#f4cc44');
+  drawText('DUNGEON',   W/2, titY+20, true, 16, '#e85030');
+  // Glow shimmer on the red word
+  ctx.globalAlpha=0.14+pulse*0.10;
+  drawText('DUNGEON',   W/2, titY+20, true, 16, '#ffa060');
+  ctx.globalAlpha=1.0;
+  drawText('REFORGED',  W/2, titY+38, true, 9,  '#c8942c');
+  // Decorative horizontal rule — ETG style
+  const ruleY=titY+50;
+  ctx.fillStyle='#1c1420'; ctx.fillRect(W/2-82,ruleY,164,1);
+  ctx.fillStyle='#e85030'; ctx.fillRect(W/2-26,ruleY-1,52,3);
+  ctx.fillStyle='rgba(244,204,68,0.5)'; ctx.fillRect(W/2-24,ruleY,48,1);
+  ctx.fillStyle='#1c1420'; ctx.fillRect(W/2-82,ruleY+2,164,1);
+  // Diamond end caps
+  ctx.fillStyle='#b06028'; ctx.fillRect(W/2-84,ruleY,2,3); ctx.fillRect(W/2+82,ruleY,2,3);
 
+  // ── SUB-STATES ────────────────────────────────────────────────────────────
   if(menuSubState==='main'){
-    // ── MENU ITEMS ────────────────────────────────────────────────────────
-    const menuTop = ruleY+18;
+    // Menu items — ETG style: centered list with bullet cursor
+    const menuTop=ruleY+18;
+    const itemH=20;
     for(let i=0;i<MENU_OPTS.length;i++){
       const sel=(menuSel===i);
-      const my=menuTop+i*18;
+      const my=menuTop+i*itemH;
       if(sel){
-        // highlight bar
-        ctx.fillStyle=`rgba(215,38,61,${0.10+pulse*0.07})`;
-        ctx.fillRect(W/2-85,my-9,170,17);
-        ctx.fillStyle='#d7263d'; ctx.fillRect(W/2-85,my-9,2,17);
+        // Selection highlight bar
+        ctx.fillStyle=`rgba(232,80,48,${0.09+pulse*0.06})`;
+        ctx.fillRect(W/2-92,my-9,184,18);
+        // Left accent bar
+        ctx.fillStyle='#e85030'; ctx.fillRect(W/2-92,my-9,2,18);
+        // Right accent bar
+        ctx.fillRect(W/2+90,my-9,2,18);
+        // Pixel borders top/bottom
+        ctx.fillStyle='rgba(232,80,48,0.28)';
+        ctx.fillRect(W/2-92,my-9,184,1); ctx.fillRect(W/2-92,my+8,184,1);
       }
-      // bullet / arrow cursor
+      // Bullet cursor — ETG-style casing pointing right
       if(sel){
-        ctx.fillStyle='#d7263d';
-        ctx.fillRect(W/2-76,my-2,5,1); ctx.fillRect(W/2-74,my-3,3,1);
-        ctx.fillRect(W/2-74,my+1+1,3,1); ctx.fillRect(W/2-76,my+1,5,1);
-        ctx.fillRect(W/2-73,my-4,2,1); ctx.fillRect(W/2-73,my+3,2,1);
+        const cx=W/2-80, cy=my;
+        ctx.fillStyle='#f0c840'; // gold casing body
+        ctx.fillRect(cx,   cy-2, 9, 5);
+        ctx.fillStyle='#d8a820';
+        ctx.fillRect(cx,   cy+1, 9, 1);   // bottom shadow
+        ctx.fillStyle='#f8e060';
+        ctx.fillRect(cx,   cy-2, 2, 2);   // primer cap
+        ctx.fillStyle='#c87828'; // tip
+        ctx.fillRect(cx+9, cy-1, 3, 3);
+        ctx.fillRect(cx+12,cy,   2, 1);
+        ctx.fillStyle='rgba(255,200,80,0.25)'; // shell glint
+        ctx.fillRect(cx+2, cy-2, 5, 1);
       }
-      drawText(MENU_OPTS[i], W/2, my, true, 8, sel?'#f0b429':'#8a7870');
+      // Menu text
+      const col=sel?'#f4cc44':'#706050';
+      drawText(MENU_OPTS[i], W/2+5, my, true, 8, col);
+      if(sel){
+        ctx.globalAlpha=0.11+pulse*0.07;
+        drawText(MENU_OPTS[i], W/2+5, my, true, 8, '#ffe888');
+        ctx.globalAlpha=1.0;
+      }
     }
-    drawText('CREATED BY REN  ·  v2', W/2, H-10, true, 5, '#2e2030');
+    drawText('CREATED BY REN  ·  v2', W/2, H-10, true, 5, '#281e28');
 
   } else if(menuSubState==='select'){
-    drawText('SELECT YOUR GUNSLINGER', W/2, ruleY+8, true, 9, '#e8dcd0');
-    drawText('A / D   ENTER TO CONFIRM', W/2, ruleY+20, true, 5, '#60504a');
+    drawText('SELECT YOUR GUNSLINGER', W/2, ruleY+10, true, 9, '#f4d872');
+    drawText('A / D   ENTER TO CONFIRM', W/2, ruleY+22, true, 5, '#60504a');
     const cw=76, gap=10, total=CHARACTERS.length*cw+(CHARACTERS.length-1)*gap;
     for(let i=0;i<CHARACTERS.length;i++){
       const ch=CHARACTERS[i];
       const x0=Math.floor((W-total)/2)+i*(cw+gap);
       const isSel=(i===charSel);
       ctx.save();
-      // card bg + border
-      ctx.fillStyle=isSel?'rgba(215,38,61,0.16)':'rgba(18,10,22,0.72)';
-      ctx.fillRect(x0,ruleY+28,cw,96);
-      ctx.strokeStyle=isSel?'#d7263d':'#2a1a28';
-      ctx.lineWidth=isSel?2:1;
-      ctx.strokeRect(Math.round(x0)+0.5,ruleY+28.5,cw-1,95);
-      // left accent bar for selected
-      if(isSel){ ctx.fillStyle='#d7263d'; ctx.fillRect(x0,ruleY+28,2,96); }
-      // sprite
+      ctx.fillStyle=isSel?'rgba(232,80,48,0.14)':'rgba(10,8,18,0.78)';
+      ctx.fillRect(x0,ruleY+30,cw,96);
+      ctx.strokeStyle=isSel?'#e85030':'#221830'; ctx.lineWidth=isSel?2:1;
+      ctx.strokeRect(Math.round(x0)+0.5,ruleY+30.5,cw-1,95);
+      if(isSel){ ctx.fillStyle='#e85030'; ctx.fillRect(x0,ruleY+30,2,96); }
       const sprArr=(SPR.chars&&SPR.chars[ch.id])?SPR.chars[ch.id]:SPR.player;
       const spr=Array.isArray(sprArr)?sprArr[0]:sprArr;
-      if(spr){ ctx.imageSmoothingEnabled=false; ctx.drawImage(spr,x0+cw/2-14,ruleY+36,28,36); }
-      drawText(ch.name.toUpperCase(), x0+cw/2, ruleY+78, true, 6, isSel?'#f0b429':'#c8b8b0');
+      if(spr){ ctx.imageSmoothingEnabled=false; ctx.drawImage(spr,x0+cw/2-14,ruleY+38,28,36); }
+      drawText(ch.name.toUpperCase(), x0+cw/2, ruleY+80, true, 6, isSel?'#f4cc44':'#c8b8b0');
       const w=WEAPON_BY_ID[ch.weapon]||{name:ch.weapon};
-      drawText(w.name.toUpperCase(),x0+cw/2,ruleY+89,true,4,'#706060');
-      drawText('Q: '+ch.abilityName.toUpperCase(),x0+cw/2,ruleY+99,true,4,'#3090a8');
-      drawText('HP '+ch.maxHp+'  SPD '+(ch.speedMul.toFixed(1)),x0+cw/2,ruleY+109,true,4,'#504848');
+      drawText(w.name.toUpperCase(),x0+cw/2,ruleY+91,true,4,'#706060');
+      drawText('Q: '+ch.abilityName.toUpperCase(),x0+cw/2,ruleY+101,true,4,'#46a8c8');
+      drawText('HP '+ch.maxHp+'  SPD '+(ch.speedMul.toFixed(1)),x0+cw/2,ruleY+111,true,4,'#504848');
       ctx.restore();
     }
-    const sel=CHARACTERS[charSel];
-    drawText(sel.desc,W/2,ruleY+130,true,5,'#a89898');
-    drawText(sel.abilityDesc,W/2,ruleY+141,true,5,'#3090a8');
+    const selC=CHARACTERS[charSel];
+    drawText(selC.desc,W/2,ruleY+132,true,5,'#a89898');
+    drawText(selC.abilityDesc,W/2,ruleY+143,true,5,'#46a8c8');
     drawText('ESC TO CANCEL',W/2,H-10,true,5,'#3a2a38');
 
   } else if(menuSubState==='controls'){
-    drawText('CONTROLS', W/2, ruleY+10, true, 9, '#e8dcd0');
-    ctx.fillStyle='rgba(215,38,61,0.08)'; ctx.fillRect(W/2-100,ruleY+4,200,14);
+    drawText('CONTROLS', W/2, ruleY+10, true, 9, '#f4d872');
+    ctx.fillStyle='rgba(232,80,48,0.08)'; ctx.fillRect(W/2-100,ruleY+4,200,14);
     const lines=[
       'MOVE        ·   W A S D',
       'AIM         ·   MOUSE',
@@ -6433,16 +6683,16 @@ function renderMenu(){
     ];
     lines.forEach((l,i)=>{
       const ly=ruleY+26+i*13;
-      ctx.fillStyle=`rgba(215,38,61,${0.05+pulse*0.04})`; ctx.fillRect(W/2-100,ly-8,200,12);
+      ctx.fillStyle=`rgba(232,80,48,${0.05+pulse*0.03})`; ctx.fillRect(W/2-100,ly-8,200,12);
       drawText(l,W/2,ly,true,6,i%2===0?'#b8a8a0':'#a09090');
     });
     drawText('CLICK / ESC TO RETURN',W/2,H-10,true,5,'#3a2a38');
 
   } else if(menuSubState==='credits'){
-    drawText('CREDITS', W/2, ruleY+10, true, 9, '#e8dcd0');
-    ctx.fillStyle='rgba(215,38,61,0.08)'; ctx.fillRect(W/2-80,ruleY+4,160,14);
+    drawText('CREDITS', W/2, ruleY+10, true, 9, '#f4d872');
+    ctx.fillStyle='rgba(232,80,48,0.08)'; ctx.fillRect(W/2-80,ruleY+4,160,14);
     [
-      ['#d7263d','CYCLOPS DUNGEON REFORGED'],
+      ['#e85030','CYCLOPS DUNGEON REFORGED'],
       ['#886060','CREATED BY REN'],
       ['#605050','A SINGLE-FILE HTML ROGUELITE'],
       ['#504848','GUNSLINGERS  ·  BOSSES  ·  COVER'],
@@ -6792,7 +7042,6 @@ function renderRoom(){
   if(r.bossExit && !r.bossExit.used){
     const ex = r.bossExit.x, ey = r.bossExit.y;
     if(dist(player.x,player.y, ex, ey) < 36){
-      drawSpriteOutline(SPR.bossExitH, offX+ex-18, offY+ey-22, '#fff');
     }
     ctx.drawImage(SPR.bossExitH, offX+ex-18, offY+ey-22);
     const pulse = 0.5 + 0.5*Math.sin(performance.now()/200);
@@ -6944,7 +7193,6 @@ function renderRoom(){
       }
       // outline when player nearby
       const _td = dist(player.x, player.y, p.x+10, p.y+11);
-      if(_td < 26) drawSpriteOutline(SPR.teleporter[fr], offX+p.x, offY+p.y, isReturn ? '#cc88ff' : '#fff');
       // tint the teleporter sprite purple when in return mode
       if(isReturn){
         ctx.save();
@@ -7001,13 +7249,11 @@ function renderRoom(){
       const csp = p.opened
         ? (SPR['chest_'+tier+'_open'] || SPR.chestOpen)
         : (SPR['chest_'+tier] || SPR.chest);
-      if(!p.opened && _cd < 26) drawSpriteOutline(csp, offX+p.x, offY+p.y, tierCol);
       ctx.drawImage(csp, offX+p.x, offY+p.y);
-      if(!p.opened && _cd < 14) drawText('[E] OPEN', offX+p.x+7, offY+p.y-7, true, 5, tierCol);
+      if(!p.opened && _cd < 14) drawText(p.isCache ? '[E] OPEN CACHE' : '[E] OPEN', offX+p.x+7, offY+p.y-7, true, 5, '#f0b429');
     }
     if(p.type==='shopkeep'){
       const _sd = dist(player.x, player.y, p.x+7, p.y+18);
-      if(_sd < 32) drawSpriteOutline(SPR.shopkeeper, offX+p.x, offY+p.y, '#fff');
       ctx.drawImage(SPR.shopkeeper, offX+p.x, offY+p.y);
     }
     if(p.type==='pedestal'){
@@ -7071,21 +7317,27 @@ function renderRoom(){
         const bob = Math.sin((p.pulseT||0)*4)*1.5;
         const px = Math.floor(offX + p.x);
         const py = Math.floor(offY + p.y + bob);
-        // glowing halo (hex -> rgb inline)
-        const hex = (wpn.color || '#fff8d8').replace('#','');
+        const rarityCol = RARITY_COLOR[wpn.rarity] || '#fff8d8';
+        // glowing halo — use rarity color instead of weapon color for instant rarity read
+        const hex = rarityCol.replace('#','');
         const hr = parseInt(hex.length===3?hex[0]+hex[0]:hex.substr(0,2),16);
         const hg = parseInt(hex.length===3?hex[1]+hex[1]:hex.substr(2,2),16);
         const hb = parseInt(hex.length===3?hex[2]+hex[2]:hex.substr(4,2),16);
         const pulse = 0.55 + 0.25*Math.sin((p.pulseT||0)*5);
-        const haloR = 11;
+        const haloR = 13;
         const grd = ctx.createRadialGradient(px, py+1, 1, px, py+1, haloR);
-        grd.addColorStop(0, `rgba(${hr},${hg},${hb},${(0.55*pulse).toFixed(3)})`);
+        grd.addColorStop(0, `rgba(${hr},${hg},${hb},${(0.60*pulse).toFixed(3)})`);
         grd.addColorStop(1, `rgba(${hr},${hg},${hb},0)`);
         ctx.fillStyle = grd;
         ctx.beginPath(); ctx.arc(px, py+1, haloR, 0, TAU); ctx.fill();
         // ground shadow
         ctx.fillStyle = 'rgba(0,0,0,0.35)';
         ctx.beginPath(); ctx.ellipse(px, py+5, 6, 2, 0, 0, TAU); ctx.fill();
+        const wDist = dist(p.x, p.y, player.x, player.y);
+        // rarity-colored outline when player is within pickup range
+        if(wDist < 12 && wspr){
+          drawSpriteOutline(wspr, px - Math.floor(wspr.width/2), py - Math.floor(wspr.height/2), rarityCol);
+        }
         // weapon sprite (or fallback star)
         if(wspr){
           ctx.drawImage(wspr, px - Math.floor(wspr.width/2), py - Math.floor(wspr.height/2));
@@ -7093,12 +7345,18 @@ function renderRoom(){
           ctx.fillStyle = wpn.color;
           ctx.fillRect(px-3, py-1, 6, 3);
         }
-        // tiny sparkle "!" prompt above
-        const sparkle = Math.sin((p.pulseT||0)*6) > 0;
-        if(sparkle){
-          ctx.fillStyle = '#fff8d8';
-          ctx.fillRect(px, py-9, 1, 3);
-          ctx.fillRect(px, py-5, 1, 1);
+        // [E] pick up / swap prompt when close
+        if(wDist < 12){
+          const promptTxt = (player.weapon2) ? '[E] SWAP' : '[E] PICK UP';
+          drawText(promptTxt, px, py - 10, true, 5, '#f0b429');
+        } else {
+          // distant sparkle hint
+          const sparkle = Math.sin((p.pulseT||0)*6) > 0;
+          if(sparkle){
+            ctx.fillStyle = '#fff8d8';
+            ctx.fillRect(px, py-9, 1, 3);
+            ctx.fillRect(px, py-5, 1, 1);
+          }
         }
       }
       continue;
@@ -7190,9 +7448,6 @@ function renderRoom(){
     ctx.rotate(ang);
     if(player.aimx < player.x){ ctx.scale(1,-1); }
     // gun arm offset forward from pivot
-    // BLACK SILHOUETTE OUTLINE — paint a 1-px black border around the gun first
-    // (4-direction offset draws of the same sprite), then the gun on top. Gives
-    // the heavy ETG-style read against bright floors and bullets.
     ctx.globalCompositeOperation = 'source-over';
     drawSpriteOutline(wspr, 3, -wspr.height/2, '#000');
     ctx.drawImage(wspr, 3, -wspr.height/2);
@@ -7351,6 +7606,47 @@ function renderRoom(){
     ctx.globalAlpha = 1;
   }
 
+  // ── ETG-STYLE OFF-SCREEN ENEMY ARROWS ────────────────────────────────────
+  if(state === STATE.RUN){
+    const r = curRoom();
+    const z = cam.zoom;
+    const HUD_TOP = 18, HUD_BOT = H - 26;
+    const PAD = 12;
+    const plsx = (offX + player.x) * z;
+    const plsy = (offY + player.y) * z;
+    const scx = W / 2, scy = (HUD_TOP + HUD_BOT) / 2;
+    const halfW = W / 2 - PAD, halfH = (HUD_BOT - HUD_TOP) / 2 - PAD;
+    for(const e of (r.entities || [])){
+      const esx = (offX + e.x) * z;
+      const esy = (offY + e.y) * z;
+      if(esx >= PAD && esx <= W - PAD && esy >= HUD_TOP + PAD && esy <= HUD_BOT - PAD) continue;
+      const ang = Math.atan2(esy - plsy, esx - plsx);
+      const cos = Math.cos(ang), sin = Math.sin(ang);
+      const tX = halfW / (Math.abs(cos) || 0.0001);
+      const tY = halfH / (Math.abs(sin) || 0.0001);
+      const t = Math.min(tX, tY);
+      const ax = Math.max(PAD, Math.min(W - PAD, scx + cos * t));
+      const ay = Math.max(HUD_TOP + PAD, Math.min(HUD_BOT - PAD, scy + sin * t));
+      const pulse = 0.78 + Math.sin(performance.now() / 220 + e.x * 0.3) * 0.22;
+      ctx.save();
+      ctx.translate(ax, ay);
+      ctx.rotate(ang);
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = e.isBoss ? '#d7263d' : '#e05020';
+      ctx.beginPath();
+      ctx.moveTo(8, 0);
+      ctx.lineTo(-5, -4);
+      ctx.lineTo(-5, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+
   // vignette / low health
   if(player.hp <= 2){
     const a = (Math.sin(performance.now()/180)+1)/2 * 0.25 + 0.1;
@@ -7436,7 +7732,6 @@ function drawEnemy(e, offX, offY){
       // flip vertically when aiming left so the gun stays right-side-up
       const flipY = (Math.abs(gunAng) > Math.PI/2) ? -1 : 1;
       ctx.scale(1, flipY);
-      // Black silhouette outline so the enemy gun reads against busy backgrounds.
       drawSpriteOutline(gunSpr, 2, -Math.floor(gunSpr.height/2), '#000');
       ctx.drawImage(gunSpr, 2, -Math.floor(gunSpr.height/2));
       ctx.restore();
@@ -7537,6 +7832,7 @@ function renderHUD(){
   if(gspr){
     ctx.fillStyle = 'rgba(255,255,255,0.06)';
     ctx.fillRect(2, H-24, gspr.width+6, 22);
+    drawSpriteOutline(gspr, 4, H-24 + Math.floor((22-gspr.height)/2), '#000');
     ctx.drawImage(gspr, 4, H-24 + Math.floor((22-gspr.height)/2));
   }
   const gunNameX = gspr ? gspr.width + 10 : 6;
@@ -7916,10 +8212,12 @@ function tryMinimapTeleport(){
       sfxLockOpen && sfxLockOpen();
       const mapFromKey = curRoomKey;           // capture BEFORE reassignment
       const mapFromPos = {x: player.x, y: player.y};
+      savePickupsToRoom(mapFromKey);
       curRoomKey = k;
       const nr = dungeon[curRoomKey];
       nr.visited = true;
       if(!nr.props || nr.props.length===0) buildRoom(nr);
+      restorePickupsFromRoom(nr);
       // place player on destination teleporter pad, mark it purple for return
       let landed = false;
       if(nr.props){
