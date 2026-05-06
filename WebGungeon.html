@@ -13,6 +13,7 @@
 </style>
 </head>
 <body>
+<audio id="bgMusic" src="https://raw.githubusercontent.com/Ren23447/Web-Gungeon-/main/Ingame.mp3" loop preload="auto" style="display:none"></audio>
 <div id="wrap"><canvas id="g" width="480" height="270"></canvas></div>
 <div id="hint">ENEMY · CYCLOPS DUNGEON REFORGED · WASD MOVE · MOUSE AIM · SPACE DASH · R RELOAD · Q ABILITY · B BLANK · F FLIP TABLES</div>
 <script>
@@ -895,22 +896,115 @@ function buildProps(){
     x.fillStyle='#d4cfa3'; x.fillRect(2,5,1,2); x.fillRect(4,5,1,2); x.fillRect(6,5,1,2); // teeth row
     x.fillStyle='#000'; x.fillRect(3,5,1,2); x.fillRect(5,5,1,2);
   });
-  SPR.heartPickup = makeSprite(10,9,(x)=>{
-    x.fillStyle='#d7263d'; 
-    x.fillRect(2,1,2,2); x.fillRect(6,1,2,2);
-    x.fillRect(1,2,8,3); x.fillRect(2,5,6,1); x.fillRect(3,6,4,1); x.fillRect(4,7,2,1);
-    x.fillStyle='#ff6b7d'; x.fillRect(2,2,2,1);
+  // Half-heart pickup: one red bullet shell = restores 1 HP (half a heart)
+  SPR.halfHeartPickup = makeSprite(7,13,(x)=>{
+    x.fillStyle='#ff88aa'; x.fillRect(2,0,1,1);
+    x.fillStyle='#ff4455'; x.fillRect(2,0,3,1);
+    x.fillStyle='#e83040'; x.fillRect(1,1,5,1);
+    x.fillStyle='#ff6688'; x.fillRect(0,2,1,8);
+    x.fillStyle='#d7263d'; x.fillRect(1,2,4,8);
+    x.fillStyle='#6a0010'; x.fillRect(5,2,1,8);
+    x.fillStyle='#3a0008'; x.fillRect(0,10,6,1);
+    x.fillStyle='#8a0a18'; x.fillRect(0,11,6,1);
+    x.fillStyle='#6a0010'; x.fillRect(0,12,6,1);
   });
-  SPR.coin = makeSprite(8,8,(x)=>{
-    x.fillStyle='#f0b429'; x.fillRect(2,1,4,6); x.fillRect(1,2,6,4);
-    x.fillStyle='#fff5c2'; x.fillRect(2,2,1,3);
-    x.fillStyle='#a37410'; x.fillRect(5,3,1,3);
+  // Full heart pickup: proper pixel heart shape = restores 2 HP (full heart)
+  SPR.heartPickup = makeSprite(8,6,(x)=>{
+    // two bumps at top (cols 1-2, 4-6), main body, tapering to tip
+    x.fillStyle='#d7263d';
+    x.fillRect(1,0,2,1); x.fillRect(4,0,3,1); // bumps
+    x.fillRect(0,1,8,2);                        // full body rows 1-2
+    x.fillRect(1,3,6,1);                        // row 3 inset
+    x.fillRect(2,4,4,1);                        // row 4 more inset
+    x.fillRect(3,5,2,1);                        // row 5 tip
+    // brighter centre highlight
+    x.fillStyle='#ff4455';
+    x.fillRect(1,0,1,1); x.fillRect(4,0,1,1);
+    x.fillRect(0,1,7,1);
+    // pink glint top-left
+    x.fillStyle='#ff99aa';
+    x.fillRect(1,0,1,1); x.fillRect(0,1,2,1);
+    // dark centre gap between bumps
+    x.fillStyle='#5a0010'; x.fillRect(3,0,1,1);
   });
-  SPR.key = makeSprite(10,7,(x)=>{
-    x.fillStyle='#f0b429';
-    x.fillRect(0,2,3,3); x.fillRect(3,3,5,1);
-    x.fillRect(7,2,1,3); x.fillRect(5,4,1,2);
-    x.fillStyle='#000'; x.fillRect(1,3,1,1);
+  // ETG-style brass shell casing — 4 spin frames (side → angled → edge → angled back)
+  SPR.coin = [0,1,2,3].map(f=>makeSprite(7,9,(x)=>{
+    if(f===0){
+      // Side-on: full casing standing upright (ETG casing icon style)
+      x.fillStyle='#1a0800'; x.fillRect(1,0,5,1); x.fillRect(0,1,1,7); x.fillRect(6,1,1,7); x.fillRect(1,8,5,1);
+      x.fillStyle='#a06010'; x.fillRect(1,1,5,7);
+      x.fillStyle='#d08818'; x.fillRect(1,1,5,5);
+      x.fillStyle='#f0a820'; x.fillRect(1,1,5,3);
+      x.fillStyle='#f8c840'; x.fillRect(1,1,5,1);
+      x.fillStyle='#fff8a0'; x.fillRect(1,1,2,1);       // top-left glint
+      x.fillStyle='#f8c840'; x.fillRect(1,2,1,5);       // left highlight stripe
+      x.fillStyle='#fff8a0'; x.fillRect(1,2,1,2);
+      x.fillStyle='#602800'; x.fillRect(5,2,1,5);       // right shadow
+      x.fillStyle='#d08818'; x.fillRect(1,7,5,1);       // base rim
+      x.fillStyle='#602800'; x.fillRect(1,1,5,1);       // neck crimp (dark)
+      x.fillStyle='#805010'; x.fillRect(2,1,3,1);       // neck crimp (mid)
+    } else if(f===1){
+      // Angling — 4px wide, spin leading to edge
+      x.fillStyle='#1a0800'; x.fillRect(2,0,4,1); x.fillRect(1,1,1,7); x.fillRect(5,1,2,7); x.fillRect(2,8,4,1);
+      x.fillStyle='#401000'; x.fillRect(5,1,1,7);       // back-face dark
+      x.fillStyle='#a06010'; x.fillRect(2,1,3,7);
+      x.fillStyle='#d08818'; x.fillRect(2,1,3,5);
+      x.fillStyle='#f0a820'; x.fillRect(2,1,3,3);
+      x.fillStyle='#f8c840'; x.fillRect(2,1,3,1);
+      x.fillStyle='#fff8a0'; x.fillRect(2,1,2,1);
+      x.fillStyle='#602800'; x.fillRect(2,1,3,1);
+      x.fillStyle='#805010'; x.fillRect(2,1,2,1);
+    } else if(f===2){
+      // Edge-on — very thin strip showing the casing cross-section
+      x.fillStyle='#1a0800'; x.fillRect(3,0,1,9);
+      x.fillStyle='#f0a820'; x.fillRect(3,1,1,7);
+      x.fillStyle='#f8c840'; x.fillRect(3,1,1,3);
+      x.fillStyle='#fff8a0'; x.fillRect(3,1,1,1);
+    } else {
+      // Angling back — other side now leading
+      x.fillStyle='#1a0800'; x.fillRect(1,0,4,1); x.fillRect(0,1,1,7); x.fillRect(4,1,1,7); x.fillRect(1,8,4,1);
+      x.fillStyle='#401000'; x.fillRect(0,1,1,7);       // back-face dark (now left)
+      x.fillStyle='#a06010'; x.fillRect(1,1,3,7);
+      x.fillStyle='#d08818'; x.fillRect(1,1,3,5);
+      x.fillStyle='#f0a820'; x.fillRect(1,1,3,3);
+      x.fillStyle='#f8c840'; x.fillRect(1,1,3,1);
+      x.fillStyle='#fff8a0'; x.fillRect(3,1,1,1);
+      x.fillStyle='#602800'; x.fillRect(1,1,3,1);
+      x.fillStyle='#805010'; x.fillRect(1,1,2,1);
+    }
+  }));
+  SPR.key = makeSprite(14,8,(x)=>{
+    // ETG-style golden key — horizontal, warm gold/amber, hollow bow on left, shaft right, 2 teeth down
+    const dk='#1a0800', md='#a06010', sl='#d09018', br='#f0b429', wh='#fff8c0';
+
+    // ── BOW (hollow ring, cols 0-5, rows 0-5) ────────────────────────────────
+    x.fillStyle=dk;
+    x.fillRect(1,0,4,1); x.fillRect(0,1,1,4); x.fillRect(5,1,1,3); x.fillRect(1,5,4,1);
+    x.fillStyle=md; x.fillRect(1,1,4,4);       // ring fill
+    x.fillStyle=dk; x.fillRect(2,2,2,2);        // hollow center
+    // highlight arc — upper-left
+    x.fillStyle=sl; x.fillRect(1,1,3,1); x.fillRect(1,2,1,2);
+    x.fillStyle=br; x.fillRect(1,1,2,1); x.fillRect(1,2,1,1);
+    x.fillStyle=wh; x.fillRect(1,1,1,1);         // single white glint
+    // shadow — lower-right
+    x.fillStyle=dk; x.fillRect(4,3,1,2); x.fillRect(3,4,2,1);
+
+    // ── SHAFT (horizontal, 2px tall, rows 2-3, cols 4-13) ─────────────────────
+    x.fillStyle=dk; x.fillRect(4,2,10,2);
+    x.fillStyle=md; x.fillRect(4,2,10,2);
+    x.fillStyle=sl; x.fillRect(4,2,10,1);        // top highlight
+    x.fillStyle=br; x.fillRect(4,2,7,1);
+    x.fillStyle=wh; x.fillRect(4,2,3,1);         // bright glint left
+
+    // ── TOOTH 1 — taller, cols 8-9, rows 4-7 ────────────────────────────────
+    x.fillStyle=dk; x.fillRect(8,4,2,4);
+    x.fillStyle=md; x.fillRect(8,4,2,3);
+    x.fillStyle=sl; x.fillRect(8,4,1,2);
+
+    // ── TOOTH 2 — shorter, cols 11-12, rows 4-6 ──────────────────────────────
+    x.fillStyle=dk; x.fillRect(11,4,2,3);
+    x.fillStyle=md; x.fillRect(11,4,2,2);
+    x.fillStyle=sl; x.fillRect(11,4,1,1);
   });
   SPR.ammoBox = makeSprite(10,8,(x)=>{
     x.fillStyle='#39c0ed'; x.fillRect(0,1,10,7);
@@ -1162,12 +1256,27 @@ function buildPlayer(){
     x.fillStyle='rgba(180,180,180,0.45)';
     x.fillRect(4,5,6,6);
   });
-  // small "blank" item icon (gungeon's defensive item)
-  SPR.blank = makeSprite(10,10,(x)=>{
-    x.fillStyle='#39c0ed'; x.fillRect(1,1,8,8);
-    x.fillStyle='#0a3a52'; x.fillRect(1,1,8,1); x.fillRect(1,8,8,1); x.fillRect(1,1,1,8); x.fillRect(8,1,1,8);
-    x.fillStyle='#fff'; x.fillRect(3,3,4,4);
-    x.fillStyle='#0a3a52'; x.fillRect(4,4,2,2);
+  // blank item icon — blue 4-pointed cross/star (ETG blank style)
+  SPR.blank = makeSprite(9,9,(x)=>{
+    // dark navy outline on prong tips
+    x.fillStyle='#091828';
+    x.fillRect(3,0,3,1); x.fillRect(3,8,3,1);   // top/bottom tip edges
+    x.fillRect(0,3,1,3); x.fillRect(8,3,1,3);   // left/right tip edges
+    // mid-blue cross bars (full vertical + horizontal)
+    x.fillStyle='#1564a0';
+    x.fillRect(3,0,3,9); x.fillRect(0,3,9,3);
+    // bright cyan centre square
+    x.fillStyle='#39c0ed'; x.fillRect(2,2,5,5);
+    // highlight — upper-left of each prong
+    x.fillStyle='#7de8ff';
+    x.fillRect(3,1,2,2);   // top prong highlight
+    x.fillRect(1,3,2,2);   // left prong highlight
+    x.fillRect(3,3,2,2);   // centre highlight
+    // bright spark pixel
+    x.fillStyle='#c8f4ff'; x.fillRect(3,3,1,1);
+    // shadow — lower-right of prongs
+    x.fillStyle='#0d4a70';
+    x.fillRect(6,3,2,3); x.fillRect(3,6,3,2);
   });
 }
 
@@ -2045,127 +2154,172 @@ function buildDoors(){
 // Character variants — selectable from menu. 4 frames for walk.
 function buildCharacters(){
   SPR.chars = {};
-  // CONVICT (default — orange jumpsuit, shades) — already exists as SPR.player; mirror it.
-  SPR.chars.convict = SPR.player;
-  // PILOT — AAA: layered jumpsuit shading, glossy goggles with reflective glints,
-  // wind-blown scarf with fold shadow, leather flight cap stitching.
-  SPR.chars.pilot = [0,1,2,3].map(f=>makeSprite(12,16,(x)=>{
-    const step = (f===0||f===2)?0:(f===1?1:-1);
-    const breathe = (f===1||f===3)?1:0;
-    // shadow falloff
-    x.fillStyle='rgba(0,0,0,0.45)'; x.fillRect(2,15,8,1);
-    x.fillStyle='rgba(0,0,0,0.25)'; x.fillRect(3,14,6,1);
-    // boots with sole hi
-    x.fillStyle='#050505';
-    if(step===0){ x.fillRect(3,13,3,2); x.fillRect(7,13,2,2); }
-    else if(step===1){ x.fillRect(2,13,3,2); x.fillRect(7,13,3,2); }
-    else { x.fillRect(3,13,3,2); x.fillRect(8,13,2,2); }
-    x.fillStyle='#2a2a2e';
-    if(step===0){ x.fillRect(3,13,3,1); x.fillRect(7,13,2,1); }
-    else if(step===1){ x.fillRect(2,13,3,1); x.fillRect(7,13,3,1); }
-    else { x.fillRect(3,13,3,1); x.fillRect(8,13,2,1); }
-    // pants (dark navy with crease)
-    x.fillStyle='#1f2747'; x.fillRect(3,11,6,3);
-    x.fillStyle='#2a3458'; x.fillRect(3,11,6,1); // top hi
-    x.fillStyle='#0f1224'; x.fillRect(3,13,6,1);
-    x.fillStyle='#141a30'; x.fillRect(5,11,1,3); // crease
-    // jumpsuit torso layered
-    x.fillStyle='#2f5fa0'; x.fillRect(2,7+breathe,8,5-breathe);
-    x.fillStyle='#1a3a70'; x.fillRect(2,11,8,1);
-    x.fillStyle='#163058'; x.fillRect(9,7+breathe,1,5-breathe); // right shadow
-    x.fillStyle='#5a8bd0'; x.fillRect(2,7+breathe,8,1); // top hi
-    x.fillStyle='#7aa8e0'; x.fillRect(3,7+breathe,6,1); // brightest top
-    // chest pocket detail
-    x.fillStyle='#1a3a70'; x.fillRect(7,10,2,1);
-    x.fillStyle='#3a6dc0'; x.fillRect(7,9,2,1);
-    // scarf with fold shadow
-    x.fillStyle='#d7263d'; x.fillRect(2,9+breathe,8,1);
-    x.fillStyle='#a8121a'; x.fillRect(2,10+breathe,8,1);
-    x.fillStyle='#7a1424'; x.fillRect(2,10+breathe,1,1); x.fillRect(9,10+breathe,1,1);
-    x.fillStyle='#ff5a72'; x.fillRect(3,9+breathe,6,1); // scarf top hi
-    // skin
-    x.fillStyle='#e3b89a'; x.fillRect(3,3,6,4);
-    x.fillStyle='#f0cfb0'; x.fillRect(4,3,4,1); // forehead hi
-    x.fillStyle='#a87b5d'; x.fillRect(3,6,6,1);
-    x.fillStyle='#c69478'; x.fillRect(3,3,1,4); // left cheek shadow
-    // leather flight cap (stitched edge)
-    x.fillStyle='#3a2818'; x.fillRect(3,1,6,2);
-    x.fillStyle='#5a3a20'; x.fillRect(3,1,6,1); // hi
-    x.fillStyle='#a36a3c'; x.fillRect(4,1,4,1); // brightest top
-    x.fillStyle='#1a1009'; x.fillRect(2,2,1,2); x.fillRect(9,2,1,2); // ear flaps
-    // goggles — chrome rim, reflective lens, hot glints
-    x.fillStyle='#1a1a1a'; x.fillRect(3,4,2,2); x.fillRect(7,4,2,2);
-    x.fillStyle='#3a3f47'; x.fillRect(3,4,2,1); x.fillRect(7,4,2,1); // top chrome
-    x.fillStyle='#39c0ed'; x.fillRect(3,5,2,1); x.fillRect(7,5,2,1); // lens base
-    x.fillStyle='#9be7ff'; x.fillRect(3,5,1,1); x.fillRect(7,5,1,1); // bright lens hi
-    x.fillStyle='#ffffff'; x.fillRect(4,4,1,1); x.fillRect(8,4,1,1); // pinpoint glint
-    // strap connecting goggles
-    x.fillStyle='#1a1a1a'; x.fillRect(5,4,2,1);
-    // mouth
-    x.fillStyle='#5a3a20'; x.fillRect(5,6,2,1);
-  }));
-  // HUNTER — AAA: forest-green ranger coat with leather strap detail, brimmed
-  // cap with brass insignia, blonde fringe under the cap, sharp focused eyes.
+
+  // HUNTER (pos 3) — purple droopy hair, very dark brown skin, yellow jacket
   SPR.chars.hunter = [0,1,2,3].map(f=>makeSprite(12,16,(x)=>{
-    const step = (f===0||f===2)?0:(f===1?1:-1);
-    const breathe = (f===1||f===3)?1:0;
+    const step=(f===0||f===2)?0:(f===1?1:-1);
+    const breathe=(f===1||f===3)?1:0;
     x.fillStyle='rgba(0,0,0,0.45)'; x.fillRect(2,15,8,1);
     x.fillStyle='rgba(0,0,0,0.25)'; x.fillRect(3,14,6,1);
     // boots
     x.fillStyle='#050505';
-    if(step===0){ x.fillRect(3,13,3,2); x.fillRect(7,13,2,2); }
-    else if(step===1){ x.fillRect(2,13,3,2); x.fillRect(7,13,3,2); }
-    else { x.fillRect(3,13,3,2); x.fillRect(8,13,2,2); }
-    x.fillStyle='#3a2818';
-    if(step===0){ x.fillRect(3,13,3,1); x.fillRect(7,13,2,1); }
-    else if(step===1){ x.fillRect(2,13,3,1); x.fillRect(7,13,3,1); }
-    else { x.fillRect(3,13,3,1); x.fillRect(8,13,2,1); }
-    // pants (leather brown)
-    x.fillStyle='#3a2818'; x.fillRect(3,11,6,3);
-    x.fillStyle='#5a3a20'; x.fillRect(3,11,6,1); // hi
-    x.fillStyle='#1a1009'; x.fillRect(3,13,6,1);
-    // forest-green ranger coat torso, layered
-    x.fillStyle='#2a5a30'; x.fillRect(2,7+breathe,8,5-breathe);
-    x.fillStyle='#163818'; x.fillRect(2,11,8,1);
-    x.fillStyle='#0e240e'; x.fillRect(9,7+breathe,1,5-breathe); // right shadow
-    x.fillStyle='#4a8c50'; x.fillRect(2,7+breathe,8,1); // top hi
-    x.fillStyle='#7ac060'; x.fillRect(3,7+breathe,6,1); // brightest top
-    // coat seam down center
-    x.fillStyle='#163818'; x.fillRect(5,7+breathe,1,4-breathe);
-    x.fillStyle='#4a8c50'; x.fillRect(6,7+breathe,1,4-breathe);
-    // leather strap across chest
-    x.fillStyle='#3a2818'; x.fillRect(2,9+breathe,8,1);
-    x.fillStyle='#5a3a20'; x.fillRect(3,9+breathe,6,1);
-    // small brass shells on strap
-    x.fillStyle='#f0b429'; x.fillRect(3,9+breathe,1,1); x.fillRect(6,9+breathe,1,1); x.fillRect(8,9+breathe,1,1);
-    // belt with brass buckle
-    x.fillStyle='#1a1209'; x.fillRect(2,10,8,1);
-    x.fillStyle='#a37410'; x.fillRect(5,10,2,1);
-    x.fillStyle='#f0b429'; x.fillRect(5,10,1,1);
-    x.fillStyle='#fff5c2'; x.fillRect(5,10,1,1);
-    // skin shaded
-    x.fillStyle='#e3b89a'; x.fillRect(3,3,6,4);
-    x.fillStyle='#f0cfb0'; x.fillRect(4,3,4,1);
-    x.fillStyle='#a87b5d'; x.fillRect(3,6,6,1);
-    x.fillStyle='#c69478'; x.fillRect(3,3,1,4);
-    // blonde fringe poking under the cap
-    x.fillStyle='#f0c84a'; x.fillRect(3,4,6,1);
-    x.fillStyle='#fff5c2'; x.fillRect(4,4,2,1); // hair hi
-    x.fillStyle='#a37410'; x.fillRect(8,4,1,1); // hair shadow
-    // cap with brim and band
-    x.fillStyle='#2a5a30'; x.fillRect(2,1,8,3);
-    x.fillStyle='#4a8c50'; x.fillRect(2,1,8,1); // top hi
-    x.fillStyle='#7ac060'; x.fillRect(3,1,6,1); // brightest
-    x.fillStyle='#163818'; x.fillRect(2,3,8,1); // brim
-    x.fillStyle='#0a1c0a'; x.fillRect(2,3,8,1);
-    // brass insignia + rim
-    x.fillStyle='#a37410'; x.fillRect(5,2,2,1);
-    x.fillStyle='#f0b429'; x.fillRect(5,2,2,1);
-    x.fillStyle='#fff5c2'; x.fillRect(5,2,1,1);
-    // sharp focused eyes
+    if(step===0){x.fillRect(3,13,3,2);x.fillRect(7,13,2,2);}
+    else if(step===1){x.fillRect(2,13,3,2);x.fillRect(7,13,3,2);}
+    else{x.fillRect(3,13,3,2);x.fillRect(8,13,2,2);}
+    x.fillStyle='#1a0e08';
+    if(step===0){x.fillRect(3,13,3,1);x.fillRect(7,13,2,1);}
+    else if(step===1){x.fillRect(2,13,3,1);x.fillRect(7,13,3,1);}
+    else{x.fillRect(3,13,3,1);x.fillRect(8,13,2,1);}
+    // dark pants
+    x.fillStyle='#2e1c10'; x.fillRect(3,11,6,3);
+    x.fillStyle='#4a2e18'; x.fillRect(3,11,6,1);
+    x.fillStyle='#180e08'; x.fillRect(3,13,6,1);
+    // YELLOW jacket torso
+    x.fillStyle='#806010'; x.fillRect(2,7+breathe,8,5-breathe);
+    x.fillStyle='#c09018'; x.fillRect(2,7+breathe,8,4-breathe);
+    x.fillStyle='#d8a820'; x.fillRect(2,7+breathe,8,2);
+    x.fillStyle='#f0c030'; x.fillRect(2,7+breathe,8,1); // bright top
+    x.fillStyle='#604808'; x.fillRect(9,8+breathe,1,4-breathe); // right shadow
+    // white undershirt collar V
+    x.fillStyle='#d0c8b0'; x.fillRect(5,7+breathe,2,2); x.fillRect(5,8+breathe,2,1);
+    // belt
+    x.fillStyle='#180e08'; x.fillRect(2,11,8,1);
+    x.fillStyle='#c09018'; x.fillRect(5,11,2,1); // belt buckle gold
+    // DARK BROWN skin
+    x.fillStyle='#4a2a18'; x.fillRect(3,3,6,4);
+    x.fillStyle='#5e3820'; x.fillRect(4,3,4,1);
+    x.fillStyle='#2e1808'; x.fillRect(3,6,6,1);
+    x.fillStyle='#3a2010'; x.fillRect(3,3,1,4);
+    // PURPLE hair — drooping wide at sides, covers top of head
+    x.fillStyle='#3a1080'; x.fillRect(2,0,8,4);   // outer dark purple
+    x.fillStyle='#6020b0'; x.fillRect(3,0,6,3);   // mid purple
+    x.fillStyle='#8030d0'; x.fillRect(3,0,5,2);   // bright purple
+    x.fillStyle='#a040f0'; x.fillRect(4,0,3,1);   // top glint
+    // sides droop down beside face
+    x.fillStyle='#3a1080'; x.fillRect(2,0,1,6); x.fillRect(9,0,1,6);
+    x.fillStyle='#6020b0'; x.fillRect(2,1,1,4); x.fillRect(9,1,1,4);
+    // bangs at forehead
+    x.fillStyle='#6020b0'; x.fillRect(3,3,2,1); x.fillRect(8,3,1,2);
+    // eyes — small dark on brown skin
     x.fillStyle='#0a0604'; x.fillRect(4,5,1,1); x.fillRect(7,5,1,1);
-    x.fillStyle='#39c0ed'; x.fillRect(4,5,1,1); // left eye glint blue
-    x.fillStyle='#5a3a20'; x.fillRect(5,6,2,1); // mouth
+    x.fillStyle='#c0a080'; x.fillRect(4,5,1,1); // light brown eyes
+    x.fillStyle='#7a2010'; x.fillRect(5,6,2,1); // mouth
+  }));
+
+  // CONVICT (pos 4) — very puffy golden/yellow hair, orange outfit, blue eyes
+  SPR.chars.convict = [0,1,2,3].map(f=>makeSprite(12,16,(x)=>{
+    const step=(f===0||f===2)?0:(f===1?1:-1);
+    const breathe=(f===1||f===3)?1:0;
+    x.fillStyle='rgba(0,0,0,0.45)'; x.fillRect(2,15,8,1);
+    x.fillStyle='rgba(0,0,0,0.25)'; x.fillRect(3,14,6,1);
+    // dark boots
+    x.fillStyle='#050505';
+    if(step===0){x.fillRect(3,13,3,2);x.fillRect(7,13,2,2);}
+    else if(step===1){x.fillRect(2,13,3,2);x.fillRect(7,13,3,2);}
+    else{x.fillRect(3,13,3,2);x.fillRect(8,13,2,2);}
+    x.fillStyle='#2a2020';
+    if(step===0){x.fillRect(3,13,3,1);x.fillRect(7,13,2,1);}
+    else if(step===1){x.fillRect(2,13,3,1);x.fillRect(7,13,3,1);}
+    else{x.fillRect(3,13,3,1);x.fillRect(8,13,2,1);}
+    // ORANGE pants
+    x.fillStyle='#6a2808'; x.fillRect(3,11,6,3);
+    x.fillStyle='#a04010'; x.fillRect(3,11,6,1);
+    x.fillStyle='#381408'; x.fillRect(3,13,6,1);
+    // ORANGE jacket torso
+    x.fillStyle='#6a2808'; x.fillRect(2,7+breathe,8,5-breathe);
+    x.fillStyle='#a04010'; x.fillRect(2,7+breathe,8,4-breathe);
+    x.fillStyle='#c05818'; x.fillRect(2,7+breathe,8,2);
+    x.fillStyle='#e07028'; x.fillRect(2,7+breathe,8,1); // bright top
+    x.fillStyle='#381408'; x.fillRect(9,8+breathe,1,4-breathe);
+    // small logo/patch detail on chest
+    x.fillStyle='#f0c030'; x.fillRect(3,9+breathe,2,2);
+    x.fillStyle='#fff8a0'; x.fillRect(3,9+breathe,1,1);
+    // belt
+    x.fillStyle='#180c08'; x.fillRect(2,11,8,1);
+    // skin (lighter)
+    x.fillStyle='#e0b890'; x.fillRect(3,3,6,4);
+    x.fillStyle='#f0cfb0'; x.fillRect(4,3,4,1);
+    x.fillStyle='#a87850'; x.fillRect(3,6,6,1);
+    // VERY PUFFY GOLDEN HAIR — extends beyond sprite edges, round and full
+    x.fillStyle='#604808'; x.fillRect(1,0,10,5);   // dark gold outer mass
+    x.fillStyle='#a07010'; x.fillRect(1,0,10,4);   // mid gold
+    x.fillStyle='#d09820'; x.fillRect(2,0,8,3);    // bright gold
+    x.fillStyle='#f0b828'; x.fillRect(2,0,8,2);    // brighter
+    x.fillStyle='#f8d040'; x.fillRect(2,0,8,1);    // brightest top
+    x.fillStyle='#fff8a0'; x.fillRect(3,0,5,1);    // top glint
+    // sides of puff extend wide
+    x.fillStyle='#a07010'; x.fillRect(1,1,1,3); x.fillRect(10,1,1,3);
+    x.fillStyle='#604808'; x.fillRect(0,2,1,2); x.fillRect(11,2,1,2);
+    // puff hangs over forehead (covers top of face)
+    x.fillStyle='#d09820'; x.fillRect(2,3,8,2);
+    x.fillStyle='#a07010'; x.fillRect(3,4,6,1);
+    x.fillStyle='#604808'; x.fillRect(4,5,4,1); // lowest fringe just above brows
+    // BLUE eyes — distinctive
+    x.fillStyle='#0a1848'; x.fillRect(4,5,1,1); x.fillRect(7,5,1,1);
+    x.fillStyle='#2060d0'; x.fillRect(4,5,1,1);
+    x.fillStyle='#60a0ff'; x.fillRect(4,5,1,1);
+    x.fillStyle='#2060d0'; x.fillRect(7,5,1,1);
+    // small mouth
+    x.fillStyle='#9a6040'; x.fillRect(5,6,2,1);
+  }));
+  // PILOT (pos 2) — full swept red/auburn hair, teal jacket open over grey shirt, satchel
+  SPR.chars.pilot = [0,1,2,3].map(f=>makeSprite(12,16,(x)=>{
+    const step=(f===0||f===2)?0:(f===1?1:-1);
+    const breathe=(f===1||f===3)?1:0;
+    x.fillStyle='rgba(0,0,0,0.45)'; x.fillRect(2,15,8,1);
+    x.fillStyle='rgba(0,0,0,0.25)'; x.fillRect(3,14,6,1);
+    // boots — dark brown leather
+    x.fillStyle='#050505';
+    if(step===0){x.fillRect(3,13,3,2);x.fillRect(7,13,2,2);}
+    else if(step===1){x.fillRect(2,13,3,2);x.fillRect(7,13,3,2);}
+    else{x.fillRect(3,13,3,2);x.fillRect(8,13,2,2);}
+    x.fillStyle='#3a2818';
+    if(step===0){x.fillRect(3,13,3,1);x.fillRect(7,13,2,1);}
+    else if(step===1){x.fillRect(2,13,3,1);x.fillRect(7,13,3,1);}
+    else{x.fillRect(3,13,3,1);x.fillRect(8,13,2,1);}
+    // dark blue pants
+    x.fillStyle='#1a2040'; x.fillRect(3,11,6,3);
+    x.fillStyle='#2a3058'; x.fillRect(3,11,6,1);
+    x.fillStyle='#0e1428'; x.fillRect(3,13,6,1);
+    // TEAL jacket body (open, showing grey shirt under)
+    x.fillStyle='#0a4848'; x.fillRect(2,7+breathe,8,5-breathe);
+    x.fillStyle='#107070'; x.fillRect(2,7+breathe,8,4-breathe);
+    x.fillStyle='#1a9090'; x.fillRect(2,7+breathe,8,2);
+    x.fillStyle='#22a8a8'; x.fillRect(2,7+breathe,8,1);
+    x.fillStyle='#0a4848'; x.fillRect(9,8+breathe,1,4-breathe);
+    // grey shirt showing through open jacket
+    x.fillStyle='#909090'; x.fillRect(4,7+breathe,4,5-breathe);
+    x.fillStyle='#b0b0b0'; x.fillRect(5,7+breathe,2,3);
+    // small satchel/bag on right side (tan strap)
+    x.fillStyle='#8a6030'; x.fillRect(9,8+breathe,2,4);
+    x.fillStyle='#c09050'; x.fillRect(9,8+breathe,2,1);
+    x.fillStyle='#6a4820'; x.fillRect(9,11,2,1);
+    // belt
+    x.fillStyle='#1a0e08'; x.fillRect(2,11,8,1);
+    x.fillStyle='#a08030'; x.fillRect(5,11,2,1);
+    // SKIN — medium tone
+    x.fillStyle='#d4a070'; x.fillRect(3,3,6,4);
+    x.fillStyle='#e8b888'; x.fillRect(4,3,4,1);
+    x.fillStyle='#9a6840'; x.fillRect(3,6,6,1);
+    x.fillStyle='#b87848'; x.fillRect(3,3,1,4);
+    // RED/AUBURN HAIR — full and swept upward/back, wide coverage
+    x.fillStyle='#5a0808'; x.fillRect(2,0,8,4);   // dark red base mass
+    x.fillStyle='#8a1010'; x.fillRect(2,0,8,3);   // mid red fill
+    x.fillStyle='#b82020'; x.fillRect(3,0,6,2);   // brighter red
+    x.fillStyle='#d83020'; x.fillRect(3,0,5,1);   // bright top
+    x.fillStyle='#f04830'; x.fillRect(4,0,3,1);   // top highlight
+    // hair sides sweep wide (full coverage like image)
+    x.fillStyle='#5a0808'; x.fillRect(2,0,1,5); x.fillRect(9,0,1,5);
+    x.fillStyle='#8a1010'; x.fillRect(2,1,1,3); x.fillRect(9,1,1,3);
+    // swept-up crown (hair rises at top, wider than mohawk)
+    x.fillStyle='#8a1010'; x.fillRect(3,0,2,1); x.fillRect(8,0,1,1);
+    // forehead fringe/bangs
+    x.fillStyle='#8a1010'; x.fillRect(3,3,2,1); x.fillRect(8,3,1,1);
+    x.fillStyle='#5a0808'; x.fillRect(2,3,1,1);
+    // eyes (dark)
+    x.fillStyle='#1a0c08'; x.fillRect(4,5,1,1); x.fillRect(7,5,1,1);
+    // mouth — neutral
+    x.fillStyle='#7a4820'; x.fillRect(5,6,2,1);
   }));
   // MARINE — AAA: brushed-steel armored plate with rivets and chest core,
   // sealed combat helmet with cyan visor that has a bright sweep highlight,
@@ -2215,136 +2369,133 @@ function buildCharacters(){
     x.fillStyle='#0a0a10'; x.fillRect(2,6,8,1); // bottom shadow
     // helmet contour (cheek guards)
     x.fillStyle='#3a3f47'; x.fillRect(2,2,1,4); x.fillRect(9,2,1,4);
-    // VISOR — recessed slot with cyan sweep glow
-    x.fillStyle='#0a1828'; x.fillRect(2,3,8,2);
-    x.fillStyle='#1a3a70'; x.fillRect(3,4,6,1);
-    x.fillStyle='#39c0ed'; x.fillRect(3,4,6,1);
-    x.fillStyle='#9be7ff'; x.fillRect(4,4,3,1); // bright sweep
-    x.fillStyle='#ffffff'; x.fillRect(4,4,1,1); x.fillRect(7,4,1,1); // pinpoint glints
+    // VISOR — recessed slot with RED glow (matches reference image)
+    x.fillStyle='#180808'; x.fillRect(2,3,8,2);
+    x.fillStyle='#600808'; x.fillRect(3,4,6,1);
+    x.fillStyle='#d02020'; x.fillRect(3,4,6,1);  // RED visor
+    x.fillStyle='#ff5040'; x.fillRect(4,4,3,1);  // bright red sweep
+    x.fillStyle='#ffb0a0'; x.fillRect(4,4,1,1); x.fillRect(7,4,1,1); // pinpoint glints
     // antenna with red light
     x.fillStyle='#3a3f47'; x.fillRect(8,0,1,1);
     x.fillStyle='#cfd6dc'; x.fillRect(8,0,1,1);
     x.fillStyle = (f===0||f===2) ? '#d7263d' : '#ff5a72'; x.fillRect(9,0,1,1); // blinking light
   }));
-  // BULLET (PLAYABLE KIN) — AAA: layered brass casing with bright top highlight
-  // band, dome with multi-tone bevel and specular glints, polished red shoes
-  // with white sole accents, expressive sad face.
+  // BULLET (PLAYABLE KIN) — brass casing body, silver dome, red shoes, wide-brim TOP HAT
   SPR.chars.bullet = [0,1,2,3].map(f=>makeSprite(12,16,(x)=>{
     const step = (f===0||f===2)?0:(f===1?1:-1);
     const breathe = (f===1||f===3)?1:0;
     // shadow
     x.fillStyle='rgba(0,0,0,0.5)'; x.fillRect(2,15,8,1);
     x.fillStyle='rgba(0,0,0,0.28)'; x.fillRect(3,14,6,1);
-    // RED SHOES — outline + body + sole + tongue hi
+    // RED SHOES
     x.fillStyle='#0a0604';
     if(step===0){ x.fillRect(3,13,3,2); x.fillRect(6,13,3,2); }
     else if(step===1){ x.fillRect(2,13,3,2); x.fillRect(7,13,3,2); }
     else { x.fillRect(3,13,3,2); x.fillRect(6,13,3,2); }
-    x.fillStyle='#7a1424';
-    if(step===0){ x.fillRect(3,13,3,1); x.fillRect(6,13,3,1); }
-    else if(step===1){ x.fillRect(2,13,3,1); x.fillRect(7,13,3,1); }
-    else { x.fillRect(3,13,3,1); x.fillRect(6,13,3,1); }
     x.fillStyle='#d7263d';
     if(step===0){ x.fillRect(3,13,3,1); x.fillRect(6,13,3,1); }
     else if(step===1){ x.fillRect(2,13,3,1); x.fillRect(7,13,3,1); }
     else { x.fillRect(3,13,3,1); x.fillRect(6,13,3,1); }
-    // shoe top hi
     x.fillStyle='#ff5a72';
     if(step===0){ x.fillRect(4,13,1,1); x.fillRect(7,13,1,1); }
     else if(step===1){ x.fillRect(3,13,1,1); x.fillRect(8,13,1,1); }
     else { x.fillRect(4,13,1,1); x.fillRect(7,13,1,1); }
-    // sole white accent
     x.fillStyle='#e8e2d0';
     if(step===0){ x.fillRect(3,14,3,1); x.fillRect(6,14,3,1); }
     else if(step===1){ x.fillRect(2,14,3,1); x.fillRect(7,14,3,1); }
     else { x.fillRect(3,14,3,1); x.fillRect(6,14,3,1); }
-    // black outline of casing
+    // brass casing body
     x.fillStyle='#0a0604';
     x.fillRect(2,7+breathe,8,6-breathe); x.fillRect(3,6+breathe,6,1); x.fillRect(3,13,6,1);
-    // brass casing — layered
     x.fillStyle='#a37410'; x.fillRect(3,8+breathe,6,5-breathe);
     x.fillStyle='#f0b429'; x.fillRect(3,7+breathe,6,5-breathe);
-    x.fillStyle='#ffd96b'; x.fillRect(3,7+breathe,6,1); // top hi band
-    x.fillStyle='#fff5c2'; x.fillRect(4,7+breathe,2,1); // brightest hi
-    x.fillStyle='#ffd96b'; x.fillRect(3,7+breathe,1,5-breathe); // left highlight column
+    x.fillStyle='#ffd96b'; x.fillRect(3,7+breathe,6,1);
+    x.fillStyle='#fff5c2'; x.fillRect(4,7+breathe,2,1);
+    x.fillStyle='#ffd96b'; x.fillRect(3,7+breathe,1,5-breathe);
     x.fillStyle='#fff5c2'; x.fillRect(3,8+breathe,1,2);
-    x.fillStyle='#7a5410'; x.fillRect(8,8+breathe,1,4-breathe); // right shadow
-    x.fillStyle='#5a3010'; x.fillRect(8,11,1,1);
-    // crimp ring with mid tone
+    x.fillStyle='#7a5410'; x.fillRect(8,8+breathe,1,4-breathe);
     x.fillStyle='#3a2818'; x.fillRect(3,7+breathe,6,1);
     x.fillStyle='#5a3010'; x.fillRect(4,7+breathe,4,1);
-    // sad face on body — sharper expression
+    // sad face
     x.fillStyle='#0a0604';
-    x.fillRect(4,9,1,2); x.fillRect(7,9,1,2); // tall eyes
-    x.fillRect(5,11,2,1); x.fillRect(4,12,1,1); x.fillRect(7,12,1,1); // sad frown
-    // silver dome head — multi-bevel
-    x.fillStyle='#0a0604'; x.fillRect(3,1,6,5); x.fillRect(4,0,4,1);
-    x.fillStyle='#5a626e'; x.fillRect(3,2,6,4);
-    x.fillStyle='#6a737e'; x.fillRect(3,2,6,3);
-    x.fillStyle='#a8b0bc'; x.fillRect(3,1,6,3);
-    x.fillStyle='#cfd6dc'; x.fillRect(4,1,4,2);
-    x.fillStyle='#e8eef4'; x.fillRect(4,1,3,1);
-    x.fillStyle='#f4f8fc'; x.fillRect(4,1,2,1);
-    x.fillStyle='#ffffff'; x.fillRect(5,1,2,1); x.fillRect(4,2,1,1); // hot glints
-    // dome right-side shadow gradient
-    x.fillStyle='#5a626e'; x.fillRect(7,3,1,3);
-    x.fillStyle='#3a3f47'; x.fillRect(8,3,1,3);
-    // dome bottom occlusion
-    x.fillStyle='#3a3f47'; x.fillRect(3,5,6,1);
+    x.fillRect(4,9,1,2); x.fillRect(7,9,1,2);
+    x.fillRect(5,11,2,1); x.fillRect(4,12,1,1); x.fillRect(7,12,1,1);
+    // silver dome head
+    x.fillStyle='#0a0604'; x.fillRect(3,3,6,4); x.fillRect(4,2,4,1);
+    x.fillStyle='#5a626e'; x.fillRect(3,4,6,3);
+    x.fillStyle='#a8b0bc'; x.fillRect(3,3,6,3);
+    x.fillStyle='#cfd6dc'; x.fillRect(4,3,4,2);
+    x.fillStyle='#ffffff'; x.fillRect(5,3,2,1); x.fillRect(4,4,1,1);
+    x.fillStyle='#3a3f47'; x.fillRect(7,5,1,2); x.fillRect(8,5,1,2);
+    x.fillStyle='#3a3f47'; x.fillRect(3,6,6,1);
+    // ── WIDE-BRIM TOP HAT (signature look) ─────────────────────────────────
+    // hat brim (wide, 10px, row 2)
+    x.fillStyle='#0a0604'; x.fillRect(1,2,10,1);
+    x.fillStyle='#1a1a1a'; x.fillRect(2,2,8,1);
+    x.fillStyle='#3a3a3a'; x.fillRect(2,2,5,1);   // brim highlight
+    // hat crown (6px wide, rows -1 to 1, rows 0-1)
+    x.fillStyle='#0a0604'; x.fillRect(3,0,6,2);
+    x.fillStyle='#1a1a1a'; x.fillRect(3,0,6,2);
+    x.fillStyle='#3a3a3a'; x.fillRect(3,0,4,1);   // crown highlight
+    x.fillStyle='#555';    x.fillRect(3,0,2,1);   // brightest
+    // hat band (gold ribbon)
+    x.fillStyle='#a37410'; x.fillRect(3,1,6,1);
+    x.fillStyle='#f0b429'; x.fillRect(4,1,3,1);
   }));
-  // CULTIST — AAA: rich velvet purple robe with cloth fold shadows, gold-trimmed
-  // pink sash with stitching, hood with deep ambient occlusion and glowing
-  // amber eyes that radiate softly into the void.
+  // CULTIST — Deep pink-magenta robes, purple-tipped hood, shadow-void face, glowing red eyes
   SPR.chars.cultist = [0,1,2,3].map(f=>makeSprite(12,16,(x)=>{
     const step = (f===0||f===2)?0:(f===1?1:-1);
     const breathe = (f===1||f===3)?1:0;
     x.fillStyle='rgba(0,0,0,0.5)'; x.fillRect(2,15,8,1);
     x.fillStyle='rgba(0,0,0,0.28)'; x.fillRect(3,14,6,1);
-    // boots peeking under the robe
+    // dark boots peeking under robe
     x.fillStyle='#0a0604';
     if(step===0){ x.fillRect(4,13,2,2); x.fillRect(7,13,2,2); }
     else if(step===1){ x.fillRect(3,13,2,2); x.fillRect(7,13,2,2); }
     else { x.fillRect(4,13,2,2); x.fillRect(8,13,2,2); }
-    x.fillStyle='#2a1a0d';
+    x.fillStyle='#1a0828';
     if(step===0){ x.fillRect(4,13,2,1); x.fillRect(7,13,2,1); }
     else if(step===1){ x.fillRect(3,13,2,1); x.fillRect(7,13,2,1); }
     else { x.fillRect(4,13,2,1); x.fillRect(8,13,2,1); }
-    // robe outline
-    x.fillStyle='#1a0820';
+    // robe outline — deep shadow
+    x.fillStyle='#180820';
     x.fillRect(2,8+breathe,8,5-breathe); x.fillRect(3,7+breathe,6,1); x.fillRect(3,13,6,1);
-    // robe body (rich layered purple)
-    x.fillStyle='#5a2a78'; x.fillRect(3,8+breathe,6,5-breathe);
-    x.fillStyle='#7a3aa8'; x.fillRect(3,8+breathe,6,4-breathe);
-    x.fillStyle='#9c5cd6'; x.fillRect(3,8+breathe,6,2);
-    x.fillStyle='#b878e8'; x.fillRect(3,8+breathe,6,1); // top hi
+    // PINK-MAGENTA robe body, ETG cultist style
+    x.fillStyle='#802060'; x.fillRect(3,8+breathe,6,5-breathe);
+    x.fillStyle='#c04090'; x.fillRect(3,8+breathe,6,4-breathe);
+    x.fillStyle='#e060b0'; x.fillRect(3,8+breathe,6,2);
+    x.fillStyle='#f890cc'; x.fillRect(3,8+breathe,6,1);  // bright top hi
     // cloth fold shadows
-    x.fillStyle='#3a1a40'; x.fillRect(5,9+breathe,1,4-breathe); x.fillRect(8,9+breathe,1,3-breathe);
-    // pink sash with gold trim and stitching
-    x.fillStyle='#e070c8'; x.fillRect(3,11,6,1);
-    x.fillStyle='#ff9ad4'; x.fillRect(4,11,4,1); // sash hi
-    x.fillStyle='#a83a8a'; x.fillRect(3,12,6,1);
-    x.fillStyle='#f0b429'; x.fillRect(3,12,6,1); // gold trim
-    x.fillStyle='#fff5c2'; x.fillRect(4,12,1,1); x.fillRect(7,12,1,1); // gold glints
-    // hood outline + body (covers head)
-    x.fillStyle='#1a0820'; x.fillRect(2,1,8,7);
-    x.fillStyle='#5a2a78'; x.fillRect(2,2,8,6);
-    x.fillStyle='#7a3aa8'; x.fillRect(3,2,6,6);
-    x.fillStyle='#9c5cd6'; x.fillRect(3,2,6,2); // hood top hi
-    x.fillStyle='#b878e8'; x.fillRect(4,2,4,1); // brightest top
-    // hood right-side shadow gradient
-    x.fillStyle='#3a1a40'; x.fillRect(8,3,1,5);
-    x.fillStyle='#5a2a78'; x.fillRect(2,3,1,5);
-    // deep shadow inside the hood (face void)
-    x.fillStyle='#0a0410'; x.fillRect(4,4,4,3);
-    // glowing amber eyes with halos
-    x.fillStyle='#a87410'; x.fillRect(4,4,1,1); x.fillRect(7,4,1,1); // halo top
-    x.fillStyle='#a87410'; x.fillRect(4,6,1,1); x.fillRect(7,6,1,1); // halo bot
-    x.fillStyle='#f7c14a'; x.fillRect(4,5,1,1); x.fillRect(7,5,1,1);
-    x.fillStyle='#fff5c2'; x.fillRect(4,5,1,1); x.fillRect(7,5,1,1); // hot core
-    // hood point on top with little hi
-    x.fillStyle='#7a3aa8'; x.fillRect(5,0,2,1);
-    x.fillStyle='#9c5cd6'; x.fillRect(5,0,1,1);
-    x.fillStyle='#1a0820'; x.fillRect(4,0,1,1); x.fillRect(7,0,1,1);
+    x.fillStyle='#480d30'; x.fillRect(5,9+breathe,1,4-breathe); x.fillRect(8,9+breathe,1,3-breathe);
+    // dark sash / belt accent
+    x.fillStyle='#300818'; x.fillRect(3,11,6,1);
+    x.fillStyle='#f0b429'; x.fillRect(3,11,1,1); x.fillRect(8,11,1,1); // gold accent dots
+    // purple trim at robe bottom
+    x.fillStyle='#6030a0'; x.fillRect(3,12,6,1);
+    x.fillStyle='#9060d0'; x.fillRect(4,12,4,1);
+    // hood — dark purple with shadow, deep void face
+    x.fillStyle='#180820'; x.fillRect(2,1,8,7);
+    x.fillStyle='#6030a0'; x.fillRect(2,2,8,6);
+    x.fillStyle='#9060c0'; x.fillRect(3,2,6,6);
+    x.fillStyle='#b080e0'; x.fillRect(3,2,5,2);  // hood top hi
+    x.fillStyle='#d0a0ff'; x.fillRect(4,2,3,1);  // brightest
+    // hood right-side shadow
+    x.fillStyle='#300848'; x.fillRect(8,3,1,5);
+    x.fillStyle='#6030a0'; x.fillRect(2,3,1,5);
+    // void face inside hood — deeper black
+    x.fillStyle='#030008'; x.fillRect(4,4,4,3);
+    // GLOWING RED EYES — cultist sinister look
+    x.fillStyle='#600010'; x.fillRect(4,4,1,1); x.fillRect(7,4,1,1); // dark halo
+    x.fillStyle='#600010'; x.fillRect(4,6,1,1); x.fillRect(7,6,1,1);
+    x.fillStyle='#d01020'; x.fillRect(4,5,1,1); x.fillRect(7,5,1,1); // red core
+    x.fillStyle='#ff4040'; x.fillRect(4,5,1,1); x.fillRect(7,5,1,1); // bright
+    // hood tip — purple with shadow framing
+    x.fillStyle='#9060c0'; x.fillRect(5,0,2,1);
+    x.fillStyle='#b080e0'; x.fillRect(5,0,1,1);
+    x.fillStyle='#180820'; x.fillRect(4,0,1,1); x.fillRect(7,0,1,1);
+    // wisps of visible purple hair at robe collar line
+    x.fillStyle='#7040b0'; x.fillRect(3,7+breathe,1,1); x.fillRect(8,7+breathe,1,1);
+    x.fillStyle='#a060d8'; x.fillRect(3,7+breathe,1,1);
   }));
   // ROBOT — AAA: brushed steel body with rivets, glowing CRT screen face with
   // animated scanline and warm phosphor glow, articulated tan feet with sole
@@ -2394,33 +2545,31 @@ function buildCharacters(){
     x.fillStyle='#a8a070'; x.fillRect(3,12,6,1);
     x.fillStyle='#d4cfa3'; x.fillRect(3,12,6,1);
     x.fillStyle='#a8a070'; x.fillRect(8,12,1,1);
-    // BOXY HEAD outline
+    // BOXY HEAD — tan/beige monitor body (matches reference image)
     x.fillStyle='#0a0604'; x.fillRect(2,1,8,6); x.fillRect(3,0,6,1);
-    // head body — brushed steel
-    x.fillStyle='#a8b0bc'; x.fillRect(3,1,6,5);
-    x.fillStyle='#cfd6dc'; x.fillRect(3,1,6,2);
-    x.fillStyle='#e8eef4'; x.fillRect(3,1,6,1); // top hi
+    // tan/beige head body (like old computer monitor)
+    x.fillStyle='#c8b890'; x.fillRect(3,1,6,5);
+    x.fillStyle='#d8c8a0'; x.fillRect(3,1,6,2);
+    x.fillStyle='#e8d8b0'; x.fillRect(3,1,4,1); // top hi
     // head right shadow
-    x.fillStyle='#7a8390'; x.fillRect(8,2,1,4);
-    // GREEN CRT SCREEN FACE — recessed, warm phosphor
-    x.fillStyle='#0a1810'; x.fillRect(3,2,6,4);
-    x.fillStyle='#0a2818'; x.fillRect(3,2,6,4);
-    x.fillStyle='#2a8a4a'; x.fillRect(4,3,4,2);
-    x.fillStyle='#5be07a'; x.fillRect(4,3,4,1);
-    // animated scanline (moves across frames)
-    const sl = (f%4); // 0..3
-    x.fillStyle='rgba(155,231,166,0.6)'; x.fillRect(4,2+ (sl%4 === 0 ? 0 : (sl===1?1:(sl===2?2:1))),4,1);
-    // smile + eyes (^_^ style)
-    x.fillStyle='#0a2818'; x.fillRect(5,3,1,1); x.fillRect(7,3,1,1);
-    x.fillRect(5,4,3,1);
-    // bright eye glints
-    x.fillStyle='#fff5c2'; x.fillRect(5,3,1,1); x.fillRect(7,3,1,1);
-    // CRT bezel reflection
-    x.fillStyle='rgba(255,255,255,0.18)'; x.fillRect(3,2,6,1);
-    // antenna with red status light
-    x.fillStyle='#3a3f47'; x.fillRect(8,0,1,1);
-    x.fillStyle='#cfd6dc'; x.fillRect(8,0,1,1);
-    x.fillStyle = (f===0||f===2) ? '#d7263d' : '#ff5a72'; x.fillRect(9,0,1,1);
+    x.fillStyle='#a09070'; x.fillRect(8,2,1,4);
+    // GREEN SCREEN FACE — large bright green rectangle (old CRT monitor, like reference)
+    x.fillStyle='#083808'; x.fillRect(3,2,6,4);   // dark bezel
+    x.fillStyle='#10a030'; x.fillRect(4,2,5,3);   // green screen fill
+    x.fillStyle='#20c040'; x.fillRect(4,2,5,2);   // brighter green
+    x.fillStyle='#30d858'; x.fillRect(4,2,4,1);   // top bright scanline
+    // SMILEY FACE on the green screen
+    x.fillStyle='#083808';
+    x.fillRect(5,3,1,1); x.fillRect(7,3,1,1);     // two dot eyes
+    // smile — 3-pixel curve
+    x.fillRect(5,4,3,1);                           // smile base
+    x.fillRect(4,4,1,1); x.fillRect(8,4,1,1);     // smile ends up
+    // screen glare/reflection
+    x.fillStyle='rgba(200,255,200,0.25)'; x.fillRect(4,2,2,1);
+    // antenna with red status light (blinks)
+    x.fillStyle='#a09070'; x.fillRect(7,0,1,1);
+    x.fillStyle='#c8b890'; x.fillRect(7,0,1,1);
+    x.fillStyle = (f===0||f===2) ? '#d7263d' : '#ff5a72'; x.fillRect(8,0,1,1);
   }));
 }
 
@@ -3050,77 +3199,45 @@ function buildBulletSprites(){
     x.fillStyle='#2a2620'; x.fillRect(3,2,6,10);
     x.fillStyle='#3a352c'; x.fillRect(3,2,6,4);
   });
-  // ── HEART HEALTH ICONS (ETG-style) ─────────────────────────────────────────
-  // Full heart — bright red with light center, dark outline
-  SPR.heartFull = makeSprite(9,8,(x)=>{
-    x.fillStyle='#1a0509';
-    x.fillRect(1,0,2,1); x.fillRect(5,0,2,1);
-    x.fillRect(0,1,9,1);
-    x.fillRect(0,2,9,3);
-    x.fillRect(1,5,7,1);
-    x.fillRect(2,6,5,1);
-    x.fillRect(3,7,3,1);
-    x.fillStyle='#d7263d';
-    x.fillRect(1,1,2,1); x.fillRect(5,1,2,1);
-    x.fillRect(1,2,7,3);
-    x.fillRect(2,5,5,1);
-    x.fillRect(3,6,3,1);
-    x.fillRect(4,7,1,1);
-    // highlight
-    x.fillStyle='#ff6688';
-    x.fillRect(1,1,2,1);
-    x.fillStyle='#ffaacc';
-    x.fillRect(2,2,1,1);
-  });
-  // Half heart — left half filled red, right half dark outline
-  SPR.heartHalf = makeSprite(9,8,(x)=>{
-    // outline
-    x.fillStyle='#1a0509';
-    x.fillRect(1,0,2,1);
-    x.fillRect(0,1,4,1);
-    x.fillRect(0,2,4,3);
-    x.fillRect(1,5,3,1);
-    x.fillRect(2,6,2,1);
-    x.fillRect(3,7,1,1);
-    x.fillRect(5,0,2,1);
-    x.fillRect(5,1,3,1);
-    x.fillRect(5,2,3,3);
-    x.fillRect(5,5,3,1);
-    x.fillRect(5,6,2,1);
-    x.fillRect(5,7,1,1);
-    // left fill
-    x.fillStyle='#d7263d';
-    x.fillRect(1,1,2,1);
-    x.fillRect(1,2,3,3);
-    x.fillRect(2,5,2,1);
-    x.fillRect(3,6,1,1);
-    // right empty
-    x.fillStyle='#2a0a0e';
-    x.fillRect(5,1,2,1);
-    x.fillRect(5,2,3,3);
-    x.fillRect(5,5,3,1);
-    x.fillRect(5,6,2,1);
-    x.fillRect(5,7,1,1);
-    // highlight
-    x.fillStyle='#ff6688'; x.fillRect(1,1,2,1);
-    x.fillStyle='#ffaacc'; x.fillRect(2,2,1,1);
-  });
-  // Empty heart — dark outline with very dim fill
-  SPR.heartEmpty = makeSprite(9,8,(x)=>{
-    x.fillStyle='#3a1520';
-    x.fillRect(1,0,2,1); x.fillRect(5,0,2,1);
-    x.fillRect(0,1,9,1);
-    x.fillRect(0,2,9,3);
-    x.fillRect(1,5,7,1);
-    x.fillRect(2,6,5,1);
-    x.fillRect(3,7,3,1);
-    x.fillStyle='#1a0509';
-    x.fillRect(1,1,2,1); x.fillRect(5,1,2,1);
-    x.fillRect(1,2,7,3);
-    x.fillRect(2,5,5,1);
-    x.fillRect(3,6,3,1);
-    x.fillRect(4,7,1,1);
-  });
+  // ── ETG-STYLE SINGLE UPRIGHT BULLET SPRITE ───────────────────────────────────
+  // One sprite = one upright red bullet (7 wide × 13 tall).
+  // Two of these are drawn per heart in the HUD, rotated inward so their tips
+  // spread apart at the top and their bases converge at the bottom — making a V / ♥.
+  //
+  //   *       *   ← dome tips (top outer corners)
+  //   |\     /|
+  //   | \   / |   ← bodies angling inward via canvas rotation
+  //   |  \ /  |
+  //   |   X   |   ← bases meet at centre-bottom (the V point)
+  //
+  // heartFull  = bright red bullet
+  // heartEmpty = near-black dim silhouette
+
+  function makeUprightBullet(full){
+    return makeSprite(7,13,(x)=>{
+      if(full){
+        x.fillStyle='#ff88aa'; x.fillRect(2,0,1,1);   // brightest tip pixel
+        x.fillStyle='#ff4455'; x.fillRect(2,0,3,1);   // dome tip  (3 px)
+        x.fillStyle='#e83040'; x.fillRect(1,1,5,1);   // dome shoulder
+        x.fillStyle='#ff6688'; x.fillRect(0,2,1,8);   // left highlight strip
+        x.fillStyle='#d7263d'; x.fillRect(1,2,4,8);   // main red body
+        x.fillStyle='#a01828'; x.fillRect(5,2,1,8);   // right shadow
+        x.fillStyle='#6a0010'; x.fillRect(6,2,1,8);   // right dark edge
+        x.fillStyle='#3a0008'; x.fillRect(0,10,7,1);  // crimp ring
+        x.fillStyle='#8a0a18'; x.fillRect(0,11,7,1);  // base rim
+        x.fillStyle='#6a0010'; x.fillRect(0,12,7,1);  // flat base
+      } else {
+        x.fillStyle='#1a0408'; x.fillRect(2,0,3,1);
+        x.fillStyle='#150306'; x.fillRect(1,1,5,1);
+        x.fillStyle='#200608'; x.fillRect(0,2,7,8);
+        x.fillStyle='#0e0204'; x.fillRect(0,10,7,1);
+        x.fillStyle='#180408'; x.fillRect(0,11,7,2);
+      }
+    });
+  }
+
+  SPR.heartFull  = makeUprightBullet(true);
+  SPR.heartEmpty = makeUprightBullet(false);
   // CULT/MAGE BULLET — glowing purple orb with cyan core
   SPR.bulletCult = makeSprite(8,8,(x)=>{
     // outer glow
@@ -3372,12 +3489,12 @@ const RARITY_COLOR = {
 /* ---------- Augments ---------- */
 /* ---------- Characters (selectable variants) ---------- */
 const CHARACTERS = [
-  {id:'pilot',   name:'PILOT',    desc:'PRECISE. STARTS WITH RAIL CARBINE.',            weapon:'rail',   maxHp:5, speedMul:1.05, ability:'cloak',    abilityName:'CLOAK',    abilityDesc:'BRIEF INVISIBILITY'},
+  {id:'pilot',   name:'PILOT',    desc:'PRECISE. STARTS WITH RAIL CARBINE.',            weapon:'rail',   maxHp:6, speedMul:1.05, ability:'cloak',    abilityName:'CLOAK',    abilityDesc:'BRIEF INVISIBILITY'},
   {id:'hunter',  name:'HUNTER',   desc:'NIMBLE. STARTS WITH SCATTERGUN. EXTRA DASH.',   weapon:'shot',   maxHp:6, speedMul:1.10, ability:'crossbow', abilityName:'CROSSBOW', abilityDesc:'PIERCING BOLT'},
-  {id:'marine',  name:'MARINE',   desc:'TANK. EXTRA HP. STARTS WITH MACHINE PISTOL.',   weapon:'smg',    maxHp:8, speedMul:0.95, ability:'supply',   abilityName:'SUPPLY',   abilityDesc:'AMMO + ARMOR DROP'},
+  {id:'marine',  name:'MARINE',   desc:'TANK. EXTRA HP. STARTS WITH MACHINE PISTOL.',   weapon:'smg',    maxHp:6, speedMul:0.95, ability:'supply',   abilityName:'SUPPLY',   abilityDesc:'AMMO + ARMOR DROP'},
   {id:'bullet',  name:'BULLET',   desc:'KIN. STARTS WITH PEACEKEEPER. EXTRA AMMO LUCK.', weapon:'rifle', maxHp:6, speedMul:1.0,  ability:'crossbow', abilityName:'BULLET BOLT', abilityDesc:'PIERCING SHOT'},
-  {id:'cultist', name:'CULTIST',  desc:'ARCANE. STARTS WITH ARC RIFLE. CLOAK ABILITY.', weapon:'arc',    maxHp:5, speedMul:1.05, ability:'cloak',    abilityName:'VEIL',     abilityDesc:'BRIEF INVISIBILITY'},
-  {id:'robot',   name:'ROBOT',    desc:'CONSTRUCTED. EXTRA HP. STARTS WITH PLASMA CASTER.', weapon:'plasma', maxHp:7, speedMul:0.95, ability:'supply', abilityName:'FABRICATE', abilityDesc:'AMMO + ARMOR DROP'},
+  {id:'cultist', name:'CULTIST',  desc:'ARCANE. STARTS WITH ARC RIFLE. CLOAK ABILITY.', weapon:'arc',    maxHp:6, speedMul:1.05, ability:'cloak',    abilityName:'VEIL',     abilityDesc:'BRIEF INVISIBILITY'},
+  {id:'robot',   name:'ROBOT',    desc:'CONSTRUCTED. EXTRA HP. STARTS WITH PLASMA CASTER.', weapon:'plasma', maxHp:6, speedMul:0.95, ability:'supply', abilityName:'FABRICATE', abilityDesc:'AMMO + ARMOR DROP'},
 ];
 const CHAR_BY_ID = Object.fromEntries(CHARACTERS.map(c=>[c.id,c]));
 let selectedCharId = 'pilot';
@@ -3424,9 +3541,8 @@ function newPlayer(){
     cloakT: 0,
     abilityCharges: ch.id==='hunter'?3 : ch.id==='pilot'?2 : 1,
     // BLANKS — Enter the Gungeon style screen-clearing item.
-    // 2 starting blanks for everyone except the Pilot (3, scavenger).
-    blanks: ch.id==='pilot' ? 3 : 2,
-    maxBlanks: 4,
+    blanks: 2,        // everyone starts with 2 blanks
+    maxBlanks: 3,
     blankFlashT: 0,
   };
 }
@@ -3719,7 +3835,7 @@ function buildRoom(room){
       if(isWall(room, tx, ty)) continue;
       if(Math.random()<0.5) room.props.push({type:'skull', x:tx*TILE, y:ty*TILE});
       else if(Math.random()<0.5) room.props.push({type:'barrel', x:tx*TILE, y:ty*TILE, hp:1, w:10, h:12});
-      else room.props.push({type:'crate', x:tx*TILE, y:ty*TILE, hp:1, w:12, h:12});
+      else room.props.push({type:'barrel', x:tx*TILE, y:ty*TILE, hp:1, w:10, h:12});
       placed=true;
     }
   }
@@ -3930,7 +4046,7 @@ function tileBlocked(room, tx, ty){
   if(room && room.props){
     const px = tx*TILE, py = ty*TILE;
     for(const p of room.props){
-      if(!(p.type==='table' || p.type==='barrel' || p.type==='crate')) continue;
+      if(!(p.type==='table' || p.type==='barrel')) continue;
       if(p.hp<=0 || p.broken) continue;
       if(px+TILE > p.x && px < p.x+(p.w||16) && py+TILE > p.y && py < p.y+(p.h||16)) return true;
     }
@@ -4233,15 +4349,6 @@ function finishTransition(){
     bullets.length = 0;
     if(nr.type === RT.BOSS && !nr.cleared){
       sfxBoss();
-      spawnBanner('THE WATCHER', 'PRIME CYCLOPS · GUARDIAN OF THE INNER VAULT', 3.2);
-    } else if(nr.type === RT.SHOP){
-      spawnBanner('SHRINE OF THE MERCHANT', 'GOLD SPEAKS LOUDER THAN OATHS', 2.0);
-    } else if(nr.type === RT.CHEST){
-      spawnBanner('TREASURE CHAMBER', '', 1.6);
-    } else if(nr.type === RT.AUG){
-      spawnBanner('AUGMENT CHAMBER', 'CHOOSE ONE PROTOCOL', 2.0);
-    } else if(nr.type === RT.COMBAT){
-      spawnBanner((['CRYPT HALL','BONE FOYER','RUINED VESTIBULE','MOSS GROTTO','SHADOW HOLD'])[irand(0,4)], '', 1.4);
     }
   }
   transitionT = 0; transitionDir = null;
@@ -4250,9 +4357,17 @@ function finishTransition(){
 /* ---------- Update ---------- */
 let last = performance.now();
 let lastError = null;
+let _bgMusicPlaying = false;
 function loop(now){
   const dt = Math.min(0.05, (now - last)/1000);
   last = now;
+  // Music: play during active gameplay states, mute on menu/death/win
+  const _bgm = document.getElementById('bgMusic');
+  if(_bgm){
+    const _inGame = state===STATE.RUN||state===STATE.SHOP||state===STATE.AUG||state===STATE.PAUSE||state===STATE.HUB||state===STATE.INTRO;
+    if(_inGame && !_bgMusicPlaying){ _bgm.play().catch(()=>{}); _bgMusicPlaying=true; }
+    else if(!_inGame && _bgMusicPlaying){ _bgm.pause(); _bgm.currentTime=0; _bgMusicPlaying=false; }
+  }
   try {
     update(dt);
     render();
@@ -4915,6 +5030,20 @@ function updateRun(dt, isHub){
       // descend to next sector
       setTimeout(()=>startRun(runStats.sector+1), 400);
     }
+    // Solid collision — player cannot walk through the exit portal
+    {
+      const ex=r.bossExit.x, ey=r.bossExit.y;
+      const bL=ex-15, bR=ex+15, bT=ey-18, bB=ey+4;
+      const pL=player.x-5, pR=player.x+5, pT=player.y-7, pB=player.y+7;
+      if(pR>bL && pL<bR && pB>bT && pT<bB){
+        const dL=pR-bL, dR=bR-pL, dT=pB-bT, dB=bB-pT;
+        const m=Math.min(dL,dR,dT,dB);
+        if(m===dL) player.x=bL-5;
+        else if(m===dR) player.x=bR+5;
+        else if(m===dT) player.y=bT-7;
+        else player.y=bB+7;
+      }
+    }
   }
 
   // interact (E) is consumed by per-prop handlers further below.
@@ -4939,7 +5068,6 @@ function updateRun(dt, isHub){
             spawnPickup('coin', e.x, e.y, Math.floor(credits));
           }
           if(Math.random() < (hasAug('scav')?0.35:0.2)){ spawnPickup('ammo', e.x, e.y, 1); }
-          if(Math.random() < 0.12){ spawnPickup('heart', e.x, e.y, 1); }
         }
         // shroomer spore explosion on death
         if(e.sporeExplode){
@@ -4997,7 +5125,7 @@ function updateRun(dt, isHub){
         if(e.isBoss){
           spawnPickup('key', e.x-24, e.y, 1);
           spawnPickup('coin', e.x, e.y+12, 10);
-          spawnPickup('heart', e.x+24, e.y, 1);
+          spawnPickup('heart', e.x+24, e.y, 2); // full heart (2 HP) from boss
           // Black chest — rarest tier, boss reward — find safe floor position
           {
             let cx = e.x + ((e.x > ROOM_PX_W/2) ? -56 : 56) - 7;
@@ -5017,7 +5145,7 @@ function updateRun(dt, isHub){
                 }
               }
             }
-            r.props.push({type:'chest', x:cx, y:cy, w:14, h:12, tier:'black', opened:false, hp:30, maxHp:30});
+            r.props.push({type:'chest', x:cx, y:cy, w:14, h:12, tier:'black', opened:false, hp:30, maxHp:30, bossChest:true});
           }
           // any remaining boss entities (twin)?
           const otherBoss = r.entities.find(o=>o.isBoss);
@@ -5041,7 +5169,6 @@ function updateRun(dt, isHub){
     if(!r.cleared && r.entities.length===0){
       r.cleared = true;
       sfxDoor();
-      spawnBanner('AREA SECURED', '', 1.4);
       // chest reward
       if(r.type===RT.COMBAT && Math.random()<0.35){
         spawnPickup('coin', ROOM_PX_W/2, ROOM_PX_H/2, 6);
@@ -5213,14 +5340,13 @@ function updateRun(dt, isHub){
       }
       // breakable props
       for(const p of r.props){
-        if((p.type==='barrel'||p.type==='crate') && p.hp>0){
+        if(p.type==='barrel' && p.hp>0){
           if(Math.abs(b.x-(p.x+p.w/2))<p.w/2 && Math.abs(b.y-(p.y+p.h/2))<p.h/2){
             p.hp -= b.dmg;
             for(let k=0;k<5;k++) spawnPart(b.x, b.y, {vx:rand(-50,50),vy:rand(-50,50),life:0.3,c:'#7c4f2c',sz:1});
             if(p.hp<=0){
               p.broken=true;
               if(Math.random()<0.7) spawnPickup('coin', p.x+p.w/2, p.y+p.h/2, 2);
-              if(Math.random()<0.25) spawnPickup('heart', p.x+p.w/2, p.y+p.h/2, 1);
               sfxKill();
             }
             if(b.type==='rocket'){ explode(b.x,b.y,r,b.dmg); }
@@ -5288,8 +5414,9 @@ function updateRun(dt, isHub){
     if(p.pickupCooldown){ p.pickupCooldown = Math.max(0, p.pickupCooldown - dt); }
     if(p.kind === 'weapon'){ p.pulseT = (p.pulseT||0) + dt; }
     const d = dist(p.x,p.y,player.x,player.y);
-    // magnet — small consumables only; weapons stay put
-    if(p.kind !== 'weapon' && d < 22){
+    // magnet — small consumables only when room is cleared; weapons stay put
+    const _roomCleared2 = curRoom && curRoom().cleared;
+    if(p.kind !== 'weapon' && d < 22 && _roomCleared2){
       const a = Math.atan2(player.y-p.y, player.x-p.x);
       p.x += Math.cos(a)*120*dt; p.y += Math.sin(a)*120*dt;
     }
@@ -5307,6 +5434,11 @@ function updateRun(dt, isHub){
             pickups.splice(i,1);
           }
         }
+        continue;
+      }
+      // noAutoPickup hearts (chest loot) — player must press [E], not auto-collect
+      if(p.kind==='heart' && p.noAutoPickup){
+        if(keys['e']){ keys['e']=false; player.hp=Math.min(player.maxHp, player.hp+p.amt); sfxPickup(); pickups.splice(i,1); }
         continue;
       }
       if(p.kind==='coin'){ player.credits += p.amt; }
@@ -5389,7 +5521,6 @@ function updateRun(dt, isHub){
           dmgNum(e.x, e.y-8, 18, '#f0b429');
           p.hp = 0; p.broken = true; sfxKill(); shakeCam(2);
           if(Math.random()<0.7) spawnPickup('coin', p.x+p.w/2, p.y+p.h/2, 2);
-          if(Math.random()<0.25) spawnPickup('heart', p.x+p.w/2, p.y+p.h/2, 1);
           for(let k=0;k<14;k++) spawnPart(p.x+p.w/2, p.y+p.h/2, {vx:rand(-90,90),vy:rand(-90,90),life:0.5,c:'#7c4f2c',sz:2,grav:240,fric:0.94});
           break;
         }
@@ -5493,7 +5624,10 @@ function updateRun(dt, isHub){
   // Universal chest interaction — works for RT.CHEST rooms AND boss rooms (black chests)
   for(const ch of (curRoom().props||[]).filter(p=>p.type==='chest')){
     if(!ch.opened && dist(player.x,player.y, ch.x+7, ch.y+6)<14 && keys['e']){
-      keys['e']=false; ch.opened=true; sfxPickup();
+      keys['e']=false;
+      if(!ch.isCache && !ch.bossChest && player.keys<=0){ sfxDeny(); spawnBanner('NO KEY','Find a key to unlock this chest',1.4); continue; }
+      if(!ch.isCache && !ch.bossChest) player.keys--;
+      ch.opened=true; sfxPickup();
       // ── WEAPONS CACHE (hub one-time chest) ──────────────────────────────────
       if(ch.isCache){
         const cachePool = WEAPONS.filter(w=>!w.exclusive);
@@ -5520,8 +5654,11 @@ function updateRun(dt, isHub){
         spawnBanner(wpn.name+' DROPPED', wpn.rarity+' · '+(wpn.dmg)+' DMG · Press [E] to pick up', 2.4);
         const coinAmt = 6 + tierIdx*4;
         spawnPickup('coin', ch.x+7, ch.y, coinAmt);
-        if(tier === 'black' || tier === 'rainbow'){
+        if(tier === 'rainbow' && Math.random() < 0.5){
           spawnPickup('heart', ch.x+7, ch.y+6, 1);
+          // Mark as interact item — player must press [E], not auto-collect
+          pickups[pickups.length-1].noAutoPickup = true;
+          pickups[pickups.length-1].life = Infinity;
         }
         if(tier === 'rainbow'){
           player.blanks = Math.min(player.maxBlanks, player.blanks + 1);
@@ -5685,9 +5822,22 @@ function spawnWeaponPickup(x, y, wid){
     pickupCooldown: 0.7       // small grace so it doesn't insta-pickup as it spawns
   });
 }
-// pickup gravity-ish (slight drift)
+// pickup gravity-ish (slight drift) + ETG-style coin magnet when room cleared
 setInterval(()=>{
-  for(const p of pickups){ p.vx*=0.85; p.vy*=0.9; p.x+=p.vx*0.05; p.y+=p.vy*0.05; }
+  const roomCleared = (typeof curRoom === 'function') && curRoom && curRoom() && curRoom().cleared;
+  for(const p of pickups){
+    if(p.kind!=='weapon' && roomCleared && (p.kind==='coin'||p.kind==='ammo'||p.kind==='key')){
+      // attract coins/ammo/keys to player like ETG room-cleared magnet
+      const adx = player.x - p.x, ady = player.y - p.y;
+      const ad = Math.hypot(adx,ady)||1;
+      const spd = Math.min(280, 60 + 3000/Math.max(ad,8));
+      p.vx = lerp(p.vx, (adx/ad)*spd, 0.28);
+      p.vy = lerp(p.vy, (ady/ad)*spd, 0.28);
+    } else {
+      p.vx*=0.85; p.vy*=0.9;
+    }
+    p.x+=p.vx*0.05; p.y+=p.vy*0.05;
+  }
 }, 50);
 
 function doInteract(){ /* handled in update for proximity */ }
@@ -7041,14 +7191,25 @@ function renderRoom(){
   // boss-cleared exit door (sector portal)
   if(r.bossExit && !r.bossExit.used){
     const ex = r.bossExit.x, ey = r.bossExit.y;
-    if(dist(player.x,player.y, ex, ey) < 36){
-    }
+    const _exitDist = dist(player.x,player.y, ex, ey);
+    const pulse = 0.5 + 0.5*Math.sin(performance.now()/300);
+    // Always-on outer golden glow around the portal
+    const glowA = 0.10 + pulse*0.12;
+    ctx.fillStyle = `rgba(255,210,60,${glowA})`;
+    ctx.fillRect(offX+ex-22, offY+ey-26, 44, 34);
+    // Draw the exit sprite
     ctx.drawImage(SPR.bossExitH, offX+ex-18, offY+ey-22);
-    const pulse = 0.5 + 0.5*Math.sin(performance.now()/200);
-    ctx.fillStyle = `rgba(57,192,237,${pulse*0.5})`;
+    // Centre portal glow (cyan, always pulsing)
+    ctx.fillStyle = `rgba(57,192,237,${0.35+pulse*0.35})`;
     ctx.fillRect(offX+ex-2, offY+ey-8, 4, 5);
-    if(dist(player.x,player.y, ex, ey)<22){
-      drawText('[E] DESCEND TO SECTOR '+(runStats.sector+1), offX+ex, offY+ey-30, true, 5, '#39c0ed');
+    if(_exitDist < 48){
+      // Bright highlight border when nearby
+      ctx.strokeStyle = `rgba(255,220,80,${0.5+pulse*0.5})`;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(offX+ex-19, offY+ey-23, 38, 30);
+      ctx.lineWidth = 1;
+      // Interact prompt
+      drawText('[E] DESCEND TO SECTOR '+(runStats.sector+1), offX+ex, offY+ey-30, true, 5, '#f8d040');
     }
   }
 
@@ -7138,7 +7299,6 @@ function renderRoom(){
       }
       ctx.restore();
     }
-    if(p.type==='crate')  ctx.drawImage(SPR.crate, offX+p.x, offY+p.y);
     if(p.type==='skull')  ctx.drawImage(SPR.skull, offX+p.x, offY+p.y);
     if(p.type==='teleporter'){
       const fr = Math.floor((p.tT||0) * 6) % 3;
@@ -7249,8 +7409,17 @@ function renderRoom(){
       const csp = p.opened
         ? (SPR['chest_'+tier+'_open'] || SPR.chestOpen)
         : (SPR['chest_'+tier] || SPR.chest);
+      if(!p.opened && _cd < 14){
+        // Outline drawn BEHIND the chest so the sprite covers the interior —
+        // only the 1px silhouette border shows, no white-wash effect.
+        drawSpriteOutline(csp, offX+p.x, offY+p.y, '#fff');
+      }
       ctx.drawImage(csp, offX+p.x, offY+p.y);
-      if(!p.opened && _cd < 14) drawText(p.isCache ? '[E] OPEN CACHE' : '[E] OPEN', offX+p.x+7, offY+p.y-7, true, 5, '#f0b429');
+      if(!p.opened && _cd < 14){
+        const chestLabel = p.isCache ? '[E] OPEN CACHE' : (player.keys>0 ? '[E] OPEN' : '[E] NEED KEY');
+        const chestLabelColor = p.isCache ? '#f0b429' : (player.keys>0 ? '#f0b429' : '#d7263d');
+        drawText(chestLabel, offX+p.x+7, offY+p.y-8, true, 5, chestLabelColor);
+      }
     }
     if(p.type==='shopkeep'){
       const _sd = dist(player.x, player.y, p.x+7, p.y+18);
@@ -7282,7 +7451,7 @@ function renderRoom(){
       ctx.fillStyle='#222'; ctx.fillRect(offX+it.x-8, offY+it.y, 16, 4);
       // icon
       let spr=null, label='';
-      if(it.kind==='heart'){ spr = SPR.heartPickup; label='+2 HP  '+it.cost+'$'; }
+      if(it.kind==='heart'){ spr = SPR.heartPickup; label='+2 HP (full heart)  '+it.cost+'$'; }
       if(it.kind==='weapon'){ spr = SPR[WEAPON_BY_ID[it.wid].sprite]; label = WEAPON_BY_ID[it.wid].name+'  '+it.cost+'$'; }
       if(it.kind==='aug'){ spr = SPR.ammoBox; label = AUGMENT_BY_ID[it.aid].name+'  '+it.cost+'$'; }
       if(spr) ctx.drawImage(spr, offX+it.x-spr.width/2, offY+it.y-spr.height-2);
@@ -7298,7 +7467,11 @@ function renderRoom(){
   }
   if(r.type===RT.CHEST){
     const ch = r.props.find(p=>p.type==='chest');
-    if(ch && !ch.opened) drawText('[E] OPEN', offX+ch.x+7, offY+ch.y-6, true, 5, '#f0b429');
+    if(ch && !ch.opened){
+      const cl = player.keys>0 ? '[E] OPEN' : '[E] NEED KEY';
+      const cc = player.keys>0 ? '#f0b429' : '#d7263d';
+      drawText(cl, offX+ch.x+7, offY+ch.y-6, true, 5, cc);
+    }
   }
   // hub door label
   if(r.type===RT.START && state===STATE.HUB){
@@ -7362,13 +7535,27 @@ function renderRoom(){
       continue;
     }
     let spr = null;
-    if(p.kind==='coin') spr = SPR.coin;
-    if(p.kind==='heart') spr = SPR.heartPickup;
+    if(p.kind==='coin') spr = SPR.coin[Math.floor(performance.now()/75 + p.x*0.37)%4];
+    if(p.kind==='heart') spr = (p.amt===1 ? SPR.halfHeartPickup : SPR.heartPickup);
     if(p.kind==='ammo') spr = SPR.ammoBox;
     if(p.kind==='key') spr = SPR.key;
     if(spr){
       const bob = Math.sin(performance.now()/200 + p.x)*1;
-      ctx.drawImage(spr, Math.floor(offX+p.x-spr.width/2), Math.floor(offY+p.y-spr.height/2+bob));
+      const dx = Math.floor(offX+p.x-spr.width/2);
+      const dy = Math.floor(offY+p.y-spr.height/2+bob);
+      // noAutoPickup heart items get a white ETG-style interact outline
+      if(p.noAutoPickup && p.kind==='heart'){
+        const pd = dist(p.x, p.y, player.x, player.y);
+        if(pd < 22){
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(dx-1, dy-1, spr.width+2, 1);
+          ctx.fillRect(dx-1, dy+spr.height, spr.width+2, 1);
+          ctx.fillRect(dx-1, dy-1, 1, spr.height+2);
+          ctx.fillRect(dx+spr.width, dy-1, 1, spr.height+2);
+          drawText('[E] +½HP', Math.floor(offX+p.x), dy-8, true, 5, '#ff88aa');
+        }
+      }
+      ctx.drawImage(spr, dx, dy);
     }
   }
 
@@ -7764,8 +7951,9 @@ function drawSpriteTinted(spr, x, y, color){
 const _outlineCache = new Map();
 function drawSpriteOutline(spr, x, y, color){
   color = color || '#fff';
-  const key = spr + '|' + color;
-  let mask = _outlineCache.get(key);
+  // Cache per-sprite-canvas by attaching a map directly to the sprite element
+  if(!spr._outlineMasks) spr._outlineMasks = {};
+  let mask = spr._outlineMasks[color];
   if(!mask){
     mask = document.createElement('canvas');
     mask.width = spr.width; mask.height = spr.height;
@@ -7775,48 +7963,111 @@ function drawSpriteOutline(spr, x, y, color){
     mx.globalCompositeOperation = 'source-in';
     mx.fillStyle = color;
     mx.fillRect(0,0,spr.width,spr.height);
-    _outlineCache.set(key, mask);
+    spr._outlineMasks[color] = mask;
   }
-  ctx.drawImage(mask, x-1, y);
-  ctx.drawImage(mask, x+1, y);
-  ctx.drawImage(mask, x, y-1);
-  ctx.drawImage(mask, x, y+1);
+  // 8-direction sampling gives a clean shape-following outline with no corner gaps
+  ctx.drawImage(mask, x-1, y);   ctx.drawImage(mask, x+1, y);
+  ctx.drawImage(mask, x, y-1);   ctx.drawImage(mask, x, y+1);
+  ctx.drawImage(mask, x-1, y-1); ctx.drawImage(mask, x+1, y-1);
+  ctx.drawImage(mask, x-1, y+1); ctx.drawImage(mask, x+1, y+1);
 }
 
 /* ---------- HUD ---------- */
 function renderHUD(){
-  // ── ETG-STYLE TOP BAR ──────────────────────────────────────────────────────
-  // Dark panel + bottom border line
-  ctx.fillStyle = 'rgba(6,5,4,0.88)';
-  ctx.fillRect(0, 0, W, 18);
-  ctx.fillStyle = '#2a1e10';
-  ctx.fillRect(0, 17, W, 1);
-  ctx.fillStyle = '#3a2818';
-  ctx.fillRect(0, 18, W, 1);
+  // No opaque background bar — HUD elements float directly over the game world
 
-  // ── HEART HEALTH ── (ETG: 1 heart = 2 HP; half-heart = 1 HP; empty = 0)
-  // Draw hearts starting at x=4, vertically centered in the bar
+  // ── HEARTS ── two upright bullets rotated into a V/♥ shape per heart
+  // VANGLE=0.52 (≈30°): steeper lean → classic ETG heart silhouette
+  // Tips spread 8 px apart at top; bases converge at centre-bottom.
+  const VANGLE = 0.82;
   const maxHearts = Math.ceil(player.maxHp / 2);
   for(let i=0; i<maxHearts; i++){
-    const hx = 4 + i * 12;
+    const hx = 3 + i * 20;   // 20 px step → hearts sit close/overlapping
     const hy = 4;
-    const hpLeft = player.hp - i*2;
-    if(hpLeft >= 2){
-      ctx.drawImage(SPR.heartFull, hx, hy);
-    } else if(hpLeft === 1){
-      ctx.drawImage(SPR.heartHalf, hx, hy);
-    } else {
-      ctx.drawImage(SPR.heartEmpty, hx, hy);
-    }
+    const hpLeft = player.hp - i * 2;
+    const lSpr = hpLeft >= 1 ? SPR.heartFull : SPR.heartEmpty;
+    const rSpr = hpLeft >= 2 ? SPR.heartFull : SPR.heartEmpty;
+
+    // Left bullet: tip at top-left corner, rotated CCW so base swings right
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(hx + 5, hy);
+    ctx.rotate(-VANGLE);
+    ctx.drawImage(lSpr, -8, -5);
+    ctx.restore();
+
+    // Right bullet: tip at top-right corner, rotated CW so base swings left
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(hx + 11, hy);
+    ctx.rotate(+VANGLE);
+    ctx.drawImage(rSpr, -3, 0);
+    ctx.restore();
   }
 
-  // ── CURRENCY ROW — coins and keys inline with small icons ─────────────────
-  const credX = maxHearts * 12 + 16;
-  ctx.drawImage(SPR.coin, credX, 5);
-  drawText(String(player.credits), credX + 10, 7, false, 5, '#f0b429');
-  const keyX = credX + 36;
-  ctx.drawImage(SPR.key, keyX, 6);
-  drawText(String(player.keys), keyX + 11, 7, false, 5, '#d4cfa3');
+  // ── BLANKS ── (row 2 — ETG blank style, drawn SLANTED ~32° for that tilted look)
+  const blankRowY = 17;
+  ctx.imageSmoothingEnabled = false;
+  for(let i=0; i<(player.maxBlanks||3); i++){
+    const bx = 4 + i*13, by = blankRowY + 4;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(bx, by);
+    ctx.rotate(Math.PI * 0.18);  // ~32° slant — clearly diagonal, not fully ×
+    if(i < player.blanks){
+      ctx.drawImage(SPR.blank, -4, -4);
+    } else {
+      ctx.globalAlpha = 0.28;
+      ctx.drawImage(SPR.blank, -4, -4);
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+  }
+  drawText('[B]', 4 + (player.maxBlanks||3)*13 + 2, blankRowY+2, false, 5, '#1a3a5a');
+
+  // ── KEYS & CURRENCY ── row 3 — directly below the blanks row
+  const hudRow3Y = blankRowY + 13;   // blanks are 11px tall → start row3 just below
+  // Key icon + count
+  ctx.drawImage(SPR.key, 3, hudRow3Y + 1);
+  drawText(String(player.keys), 3+14+2, hudRow3Y+1, false, 5, '#e8c060');
+  // Casing icon + credit count
+  const coinHudX = 3 + 14 + 2 + 14 + 4;
+  ctx.drawImage(SPR.coin[0], coinHudX, hudRow3Y - 1);
+  drawText(String(player.credits), coinHudX+8, hudRow3Y+1, false, 5, '#f0b429');
+
+  // ── AMMO PIPS ── right side, well below minimap; count label sits bottom-LEFT next to pips
+  {
+    const _mag  = Math.max(1, player.mag|0);
+    const _ammo = clamp(player.ammo|0, 0, _mag);
+    const pH=5, pW=3, pGap=1;
+    // Start 18px below minimap bottom for clear separation
+    const _lay = getMinimapLayout();
+    const pipTopY = _lay ? (_lay.oy + _lay.h + 18) : 60;
+    const maxPipH = H - 30 - pipTopY;
+    const perCol  = Math.max(1, Math.floor(Math.max(20, maxPipH)/(pH+pGap)));
+    const numCols = Math.ceil(_mag/perCol);
+    const colStep = pW+4;
+    const aRight  = W-4;
+    for(let i=0;i<_mag;i++){
+      const col=Math.floor(i/perCol), row=i%perCol;
+      const px=aRight-(numCols-1-col)*colStep;
+      const py=pipTopY+row*(pH+pGap);
+      if(i<_ammo){
+        ctx.fillStyle=player.reloading?'#f0b429':'#cfd2d6';
+        ctx.fillRect(px,py,pW,1);
+        ctx.fillStyle='#f0c84a';
+        ctx.fillRect(px,py+1,pW,pH-1);
+      } else {
+        ctx.fillStyle='#1a1209';
+        ctx.fillRect(px,py,pW,pH);
+      }
+    }
+    // Label: bottom-LEFT of the pip cluster, same row as last pip, not overlapping
+    const pipClusterLeft = aRight - (numCols-1)*colStep - pW;
+    const labelY = pipTopY + (perCol-1)*(pH+pGap) + pH;
+    const ammoColor = player.reloading?'#f0b429':(_ammo===0?'#d7263d':'#39c0ed');
+    drawText(_ammo+'/'+_mag, pipClusterLeft, labelY+2, false, 5, ammoColor, 'left');
+  }
 
   // ── ETG-STYLE BOTTOM WEAPON PANEL ─────────────────────────────────────────
   ctx.fillStyle = 'rgba(6,5,4,0.92)';
@@ -7837,39 +8088,9 @@ function renderHUD(){
   }
   const gunNameX = gspr ? gspr.width + 10 : 6;
   drawText(w.name, gunNameX, H-21, false, 6, '#fff5e0');
-  // ammo — visual readout (rows of bullet pips)
-  const mag = Math.max(1, player.mag|0);
-  const ammo = clamp(player.ammo|0, 0, mag);
-  const ammoX = gunNameX, ammoY = H-12;
-  // numeric backstop
-  drawText(ammo+'/'+mag, gunNameX, H-4, false, 5, player.reloading?'#f0b429': (ammo===0?'#d7263d':'#39c0ed'));
-  // bullet pips: 2px wide, 5px tall, 1px gap; wrap to 2 rows if mag is large
-  const maxW = 110;
-  const pipW = 2, pipGap = 1;
-  let perRow = Math.min(mag, Math.max(8, Math.floor(maxW/(pipW+pipGap))));
-  perRow = Math.min(perRow, mag);
-  const rows = Math.ceil(mag / perRow);
-  const rowH = 5, rowGap = 1;
-  for(let i=0;i<mag;i++){
-    const r = Math.floor(i/perRow), c = i%perRow;
-    const px = ammoX + c*(pipW+pipGap);
-    const py = ammoY - (rows-1-r)*(rowH+rowGap);
-    if(i < ammo){
-      // brass casing + bullet tip
-      ctx.fillStyle = '#f0c84a';
-      ctx.fillRect(px, py+2, pipW, rowH-2);
-      ctx.fillStyle = player.reloading ? '#f0b429' : '#cfd2d6';
-      ctx.fillRect(px, py, pipW, 2);
-    } else {
-      // empty slot
-      ctx.fillStyle = '#222';
-      ctx.fillRect(px, py, pipW, rowH);
-      ctx.fillStyle = '#3a2818';
-      ctx.fillRect(px, py+rowH-1, pipW, 1);
-    }
-  }
+  // Reload indicator (ammo pips moved to top-right HUD)
   if(player.reloading){
-    const reloadX = ammoX + perRow*(pipW+pipGap) + 6;
+    const reloadX = gunNameX;
     drawText('RELOAD', reloadX, H-13, false, 6, '#f0b429');
     const fr = (WEAPON_BY_ID[player.weapon].reload - player.reloadT)/WEAPON_BY_ID[player.weapon].reload;
     ctx.fillStyle='#1a1a1a'; ctx.fillRect(reloadX, H-7, 50, 3);
@@ -7905,23 +8126,6 @@ function renderHUD(){
   ctx.fillStyle = dc>=1? '#39c0ed':'#2a3a48';
   ctx.fillRect(130, H-13, Math.floor(30*clamp(dc,0,1)), 3);
 
-  // BLANKS — small icons + count, like Enter the Gungeon
-  drawText('BLANK [B]', 168, H-21, false, 6, '#8a9aa8');
-  for(let i=0; i<(player.maxBlanks||4); i++){
-    const bx = 168 + i*9, by = H-13;
-    if(i < player.blanks){
-      // filled blank icon (yellow ring with white center)
-      ctx.fillStyle = '#1a1009'; ctx.fillRect(bx-1, by-1, 8, 8);
-      ctx.fillStyle = '#f0b429'; ctx.fillRect(bx, by, 6, 6);
-      ctx.fillStyle = '#fff5c2'; ctx.fillRect(bx+1, by+1, 4, 4);
-      ctx.fillStyle = '#39c0ed'; ctx.fillRect(bx+2, by+2, 2, 2);
-    } else {
-      // empty slot
-      ctx.fillStyle = '#222'; ctx.fillRect(bx, by, 6, 6);
-      ctx.fillStyle = '#3a2818'; ctx.fillRect(bx+1, by+1, 4, 4);
-    }
-  }
-
   // augments icons
   for(let i=0;i<player.augments.length;i++){
     ctx.fillStyle='#39c0ed'; ctx.fillRect(214 + i*10, H-13, 6, 6);
@@ -7935,9 +8139,9 @@ function renderHUD(){
     ctx.fillRect(0,0,W,H);
   }
 
-  // sector label and minimap top right
+  // sector label below ammo pips (top bar is now 30px)
   const sLabel = state===STATE.HUB? 'HUB · STAGING BAY' : 'SECTOR '+String(runStats.sector).padStart(2,'0');
-  drawText(sLabel, W-4, 4, false, 6, '#f0b429', 'right');
+  drawText(sLabel, W-4, 33, false, 6, '#f0b429', 'right');
   drawMinimap();
 }
 
@@ -7950,7 +8154,7 @@ function getMinimapLayout(){
   const minY = Math.min(...ys), maxY = Math.max(...ys);
   const w = (maxX-minX+1)*cellSz, h = (maxY-minY+1)*cellSz;
   const ox = W - w - 6;
-  const oy = 20;
+  const oy = 42;
   return { ox, oy, cellSz, minX, minY, maxX, maxY, w, h };
 }
 
