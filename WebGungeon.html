@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>WebGungeon v12.3</title>
+<title>FxWalls — Cyclops Dungeon Reforged</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/Ren23447/Web-Gungeon-/refs/heads/main/ICON.png">
 <style>
@@ -180,83 +180,99 @@ function buildTiles(){
   SPR.tiles = {};
   const themes = [
     // 0 KEEP OF THE LEAD LORD — warm tan flagstone, dark warm-brown brick walls
-    { fbase:'#9a7a52', fmid:'#7d5e3c', fdark:'#4d3520', fhi:'#c8a072', fhi2:'#dab788', fmortar:'#1a1009',
+    { fbase:'#9a7a52', fmid:'#7d5e3c', fshad:'#311a0c', fdark:'#4a3018', fhi:'#c8a072', fhi2:'#e0c090', fmortar:'#100805',
       wface:'#5a3d24', wfaceMid:'#7a5230', wfaceHi:'#a8763d', wfaceLow:'#3a2410', wmortar:'#150c06', wbottom:'#000',
       ceiling:'#000', topHi:'#a8763d', accent:'#d7263d' },
     // 1 OUBLIETTE — wet mossy slate flagstone, dark slate walls
-    { fbase:'#6a7864', fmid:'#4d5b48', fdark:'#2a3526', fhi:'#8a988a', fhi2:'#a6b29e', fmortar:'#0a120a',
+    { fbase:'#6a7864', fmid:'#4d5b48', fshad:'#1c2a1e', fdark:'#2e3e2c', fhi:'#90a08e', fhi2:'#b0c0aa', fmortar:'#060e07',
       wface:'#3a4836', wfaceMid:'#506050', wfaceHi:'#7a8a72', wfaceLow:'#1f2a1c', wmortar:'#0a120a', wbottom:'#000',
       ceiling:'#000', topHi:'#7a8a72', accent:'#29c46d' },
     // 2 HOLLOW — pale violet flagstone, dark mauve walls
-    { fbase:'#80708a', fmid:'#5d4f6e', fdark:'#37294a', fhi:'#a094b0', fhi2:'#bbb1ca', fmortar:'#0e0918',
+    { fbase:'#80708a', fmid:'#5d4f6e', fshad:'#251436', fdark:'#3a2452', fhi:'#a89ec0', fhi2:'#c8bed8', fmortar:'#07040e',
       wface:'#3d3450', wfaceMid:'#5a4e72', wfaceHi:'#8474a8', wfaceLow:'#241a36', wmortar:'#0e0918', wbottom:'#000',
       ceiling:'#000', topHi:'#8474a8', accent:'#39c0ed' },
   ];
   themes.forEach((th,ti)=>{
     const floors = [];
-    // 8 organic flagstone variants — irregular polygon stones with chamfered bevels
-    // each tile holds 2-3 stones of different shapes so they don't tile into a perfect grid
-    for(let v=0; v<8; v++){
+    // 12 ETG-style flagstone variants.
+    // Each stone is lit row-by-row (top=bright→bottom=dark) + left-edge highlight
+    // + right-edge shadow, giving real depth at the 2.4× game zoom.
+    for(let v=0; v<12; v++){
       floors.push(makeSprite(16,16,(x)=>{
-        // base mortar layer
         x.fillStyle = th.fmortar; x.fillRect(0,0,16,16);
-        // pick a shape variant
-        // each variant defines stones as rectangles with chamfered (1px-cut) corners
         const stones = [];
         switch(v){
-          case 0: // 4 stones, diagonal split
-            stones.push({x:1,y:1,w:8,h:6}); stones.push({x:10,y:1,w:5,h:8});
-            stones.push({x:1,y:8,w:5,h:7}); stones.push({x:7,y:9,w:8,h:6}); break;
-          case 1: // 3 stones — long horizontal
-            stones.push({x:1,y:1,w:14,h:5}); stones.push({x:1,y:7,w:7,h:8}); stones.push({x:9,y:7,w:6,h:8}); break;
-          case 2: // 3 stones — long vertical
-            stones.push({x:1,y:1,w:5,h:14}); stones.push({x:7,y:1,w:8,h:7}); stones.push({x:7,y:9,w:8,h:6}); break;
-          case 3: // 4 small stones
-            stones.push({x:1,y:1,w:6,h:6}); stones.push({x:8,y:1,w:7,h:7});
-            stones.push({x:1,y:8,w:7,h:7}); stones.push({x:9,y:9,w:6,h:6}); break;
-          case 4: // 5 mixed stones
-            stones.push({x:1,y:1,w:9,h:4}); stones.push({x:11,y:1,w:4,h:9});
-            stones.push({x:1,y:6,w:5,h:5}); stones.push({x:7,y:6,w:7,h:4});
-            stones.push({x:1,y:12,w:14,h:3}); break;
-          case 5: // 2 big stones
-            stones.push({x:1,y:1,w:9,h:8}); stones.push({x:11,y:1,w:4,h:8});
-            stones.push({x:1,y:10,w:14,h:5}); break;
-          case 6: // 4 stones — offset grid
-            stones.push({x:1,y:1,w:5,h:7}); stones.push({x:7,y:1,w:8,h:5});
-            stones.push({x:7,y:7,w:8,h:4}); stones.push({x:1,y:9,w:14,h:6}); break;
-          default: // 7 — 4 stones — two on top, one big bottom
-            stones.push({x:1,y:1,w:7,h:8}); stones.push({x:9,y:1,w:6,h:5});
-            stones.push({x:9,y:6,w:6,h:8}); stones.push({x:1,y:10,w:7,h:5});
+          case 0:  // single slab — whole interior, max gradient read
+            stones.push({x:1,y:1,w:14,h:14}); break;
+          case 1:  // two horizontal slabs
+            stones.push({x:1,y:1,w:14,h:6}); stones.push({x:1,y:9,w:14,h:6}); break;
+          case 2:  // two vertical slabs
+            stones.push({x:1,y:1,w:6,h:14}); stones.push({x:9,y:1,w:6,h:14}); break;
+          case 3:  // four equal quads
+            stones.push({x:1,y:1,w:6,h:6}); stones.push({x:9,y:1,w:6,h:6});
+            stones.push({x:1,y:9,w:6,h:6}); stones.push({x:9,y:9,w:6,h:6}); break;
+          case 4:  // wide top slab + two below
+            stones.push({x:1,y:1,w:14,h:5}); stones.push({x:1,y:8,w:6,h:7}); stones.push({x:9,y:8,w:6,h:7}); break;
+          case 5:  // tall left slab + two right
+            stones.push({x:1,y:1,w:5,h:14}); stones.push({x:8,y:1,w:7,h:6}); stones.push({x:8,y:9,w:7,h:6}); break;
+          case 6:  // brick-bond stagger — 4 stones offset by half
+            stones.push({x:1,y:1,w:8,h:6}); stones.push({x:11,y:1,w:4,h:6});
+            stones.push({x:1,y:9,w:4,h:6}); stones.push({x:7,y:9,w:8,h:6}); break;
+          case 7:  // L-shape + fill
+            stones.push({x:1,y:1,w:8,h:8}); stones.push({x:11,y:1,w:4,h:13});
+            stones.push({x:1,y:11,w:8,h:3}); break;
+          case 8:  // tall left + two stacked right
+            stones.push({x:1,y:1,w:6,h:14}); stones.push({x:9,y:1,w:6,h:6}); stones.push({x:9,y:9,w:6,h:6}); break;
+          case 9:  // three horizontal bands
+            stones.push({x:1,y:1,w:14,h:4}); stones.push({x:1,y:7,w:14,h:4}); stones.push({x:1,y:13,w:14,h:2}); break;
+          case 10: // top slab + two asymmetric bottom
+            stones.push({x:1,y:1,w:14,h:5}); stones.push({x:1,y:8,w:9,h:7}); stones.push({x:12,y:8,w:3,h:7}); break;
+          default: // 11 — asymmetric 4-stone layout
+            stones.push({x:1,y:1,w:6,h:9}); stones.push({x:9,y:1,w:6,h:5});
+            stones.push({x:9,y:8,w:6,h:7}); stones.push({x:1,y:12,w:6,h:3}); break;
         }
-        // draw each stone with: base, chamfer corners, bevel highlights, bevel shadows
         for(const s of stones){
-          // base fill (alternate base and mid for variation)
-          const useMid = ((s.x + s.y) % 4) > 1;
-          x.fillStyle = useMid ? th.fmid : th.fbase;
-          x.fillRect(s.x, s.y, s.w, s.h);
-          // chamfer the four corners (clip 1px notch)
+          const {x:sx, y:sy, w:sw, h:sh} = s;
+          // Alternate stone body color for variety across tiles
+          const isAlt = ((v + sx + sy) & 1) === 0;
+          const bodyHi = isAlt ? th.fbase : th.fmid;
+          const bodyLo = isAlt ? th.fmid : th.fbase;
+
+          // ── ROW-BY-ROW GRADIENT — top-lit, bottom in shadow ──────────────
+          // Mimics directional light from upper-left, the ETG hallmark.
+          for(let ry=0; ry<sh; ry++){
+            const t = sh > 1 ? ry/(sh-1) : 0;
+            let col;
+            if(ry===0)        col = th.fhi2;    // sunlit top edge
+            else if(ry===1)   col = th.fhi;     // sub-bevel
+            else if(t > 0.88) col = th.fdark;   // deep bottom shadow
+            else if(t > 0.70) col = th.fshad;   // pre-shadow band
+            else if(t > 0.45) col = bodyLo;     // lower body
+            else              col = bodyHi;     // upper body (lit side)
+            x.fillStyle = col;
+            x.fillRect(sx, sy+ry, sw, 1);
+          }
+
+          // ── LEFT COLUMN HIGHLIGHT — bright edge catches top-left light ───
+          x.fillStyle = th.fhi2; x.fillRect(sx, sy, 1, sh);          // col 0: brightest
+          if(sw>3){ x.fillStyle=th.fhi; x.fillRect(sx+1, sy+1, 1, sh-2); }  // col 1: highlight
+
+          // ── RIGHT COLUMN SHADOW — facing away from light ──────────────────
+          x.fillStyle = th.fdark; x.fillRect(sx+sw-1, sy, 1, sh);    // col -1: dark
+          if(sw>3){ x.fillStyle=th.fshad; x.fillRect(sx+sw-2, sy+1, 1, sh-2); } // col -2: shadow
+
+          // ── CHAMFER CORNERS — mortar wins over bevel/shadow pixels ────────
           x.fillStyle = th.fmortar;
-          x.fillRect(s.x, s.y, 1, 1);
-          x.fillRect(s.x+s.w-1, s.y, 1, 1);
-          x.fillRect(s.x, s.y+s.h-1, 1, 1);
-          x.fillRect(s.x+s.w-1, s.y+s.h-1, 1, 1);
-          // top + left bevel highlight (inset 1px from the chamfered corners)
-          x.fillStyle = th.fhi;
-          x.fillRect(s.x+1, s.y, s.w-2, 1);
-          x.fillRect(s.x, s.y+1, 1, s.h-2);
-          // brightest pixel near top-left
-          x.fillStyle = th.fhi2;
-          x.fillRect(s.x+1, s.y, Math.min(2, s.w-2), 1);
-          // bottom + right bevel shadow
-          x.fillStyle = th.fdark;
-          x.fillRect(s.x+1, s.y+s.h-1, s.w-2, 1);
-          x.fillRect(s.x+s.w-1, s.y+1, 1, s.h-2);
-          // sparse grain inside the stone
-          if(s.w>4 && s.h>4){
-            x.fillStyle = useMid ? th.fbase : th.fmid;
-            x.fillRect(s.x+irand(2,s.w-3), s.y+irand(2,s.h-3), 1, 1);
-            x.fillStyle = th.fdark;
-            x.fillRect(s.x+irand(2,s.w-3), s.y+irand(2,s.h-3), 1, 1);
+          x.fillRect(sx,      sy,      1,1); x.fillRect(sx+sw-1, sy,      1,1);
+          x.fillRect(sx,      sy+sh-1, 1,1); x.fillRect(sx+sw-1, sy+sh-1, 1,1);
+
+          // ── SURFACE GRAIN — break up the fill with a few scattered pixels ─
+          if(sw>5 && sh>5){
+            const gcnt = 3 + Math.floor((sw*sh)/22);
+            for(let g=0; g<gcnt; g++){
+              x.fillStyle = (g&1) ? th.fhi : th.fshad;
+              x.fillRect(sx+irand(2,sw-3), sy+irand(2,sh-3), 1, 1);
+            }
           }
         }
       }));
@@ -5046,6 +5062,24 @@ function updateRun(dt, isHub){
     }
   }
 
+  // Blobu boss solid collision — prevent player walking through the large blob
+  {
+    const blobu = r.entities && r.entities.find(e=>e.bossKind==='blobu' && !e.dead);
+    if(blobu){
+      const bL=blobu.x-blobu.w/2, bR=blobu.x+blobu.w/2;
+      const bT=blobu.y-blobu.h/2, bB=blobu.y+blobu.h/2;
+      const pL=player.x-6, pR=player.x+6, pT=player.y-8, pB=player.y+8;
+      if(pR>bL && pL<bR && pB>bT && pT<bB){
+        const dL=pR-bL, dR=bR-pL, dT=pB-bT, dB=bB-pT;
+        const m=Math.min(dL,dR,dT,dB);
+        if(m===dL) player.x=bL-6;
+        else if(m===dR) player.x=bR+6;
+        else if(m===dT) player.y=bT-8;
+        else player.y=bB+8;
+      }
+    }
+  }
+
   // interact (E) is consumed by per-prop handlers further below.
 
   // i-frames
@@ -5936,152 +5970,158 @@ function updateEnemy(e, dt, room){
 
   if(e.isBoss){
     e.fireCool -= dt;
-    const lowHP = e.hp < e.maxHp/2;
+    // Phase system — transitions at 75 / 50 / 25 % HP
+    const hpPct = e.hp / e.maxHp;
+    const targetPhase = hpPct>0.75 ? 0 : hpPct>0.50 ? 1 : hpPct>0.25 ? 2 : 3;
+    if(targetPhase > (e.phase||0)){
+      e.phase = targetPhase;
+      for(let k=0;k<24;k++) spawnPart(e.x+rand(-10,10), e.y+rand(-10,10),
+        {vx:rand(-110,110),vy:rand(-110,110),life:0.7,c:'#f0b429',sz:2,fric:0.9});
+      shakeCam(5);
+    }
+    const p = e.phase||0;
+
     if(e.bossKind==='watcher'){
+      // p0: radial burst | p1: + aimed shot | p2: + cross | p3: + aimed spray
       if(e.fireCool<=0){
-        const n = lowHP ? 14 : 9;
-        for(let i=0;i<n;i++){
-          const a = (i/n)*TAU + Math.random()*0.08 + e.anim*0.4;
-          shoot(a, 90, 1, '#5b2a8c', {bossBullet:true, life:2.4});
-        }
+        const a0 = Math.atan2(dy,dx);
+        const n = [9,11,12,14][p];
+        for(let i=0;i<n;i++) shoot((i/n)*TAU + e.anim*0.4, [90,95,100,110][p], 1, '#5b2a8c', {bossBullet:true,life:2.4});
+        if(p>=1) shoot(a0, 140, 1, '#d7263d', {life:2.0});
+        if(p>=2) for(let i=0;i<4;i++) shoot(i*TAU/4 + e.anim*0.25, 105, 2, '#d7263d', {life:2.2});
+        if(p>=3) for(let s=-2;s<=2;s++) shoot(a0+s*0.15, 155, 2, '#ff3355', {life:2.0});
         sfxShoot(); shakeCam(2);
-        e.fireCool = lowHP ? 1.2 : 1.9;
+        e.fireCool = [1.9,1.6,1.3,1.0][p];
       }
-      e.vx = lerp(e.vx, ax*e.speed, 0.05);
-      e.vy = lerp(e.vy, ay*e.speed, 0.05);
+      e.vx = lerp(e.vx, ax*e.speed*(1+p*0.1), 0.05);
+      e.vy = lerp(e.vy, ay*e.speed*(1+p*0.1), 0.05);
+
     } else if(e.bossKind==='twin'){
-      // strafing — orbits player and double-shots
+      // p0: double shot | p1: triple | p2: + fast charge | p3: quintuple + charge
       const tang = Math.atan2(dy,dx) + Math.PI/2 + (e.x<player.x?Math.PI:0);
-      e.vx = lerp(e.vx, Math.cos(tang)*e.speed, 0.1);
-      e.vy = lerp(e.vy, Math.sin(tang)*e.speed, 0.1);
+      e.vx = lerp(e.vx, Math.cos(tang)*e.speed*(1+p*0.1), 0.1);
+      e.vy = lerp(e.vy, Math.sin(tang)*e.speed*(1+p*0.1), 0.1);
       if(e.fireCool<=0){
-        for(let s=-1;s<=1;s+=2){
-          shoot(Math.atan2(dy,dx)+s*0.06, 130, 1, '#d7263d', {type:'enemy'});
-        }
+        const a0 = Math.atan2(dy,dx);
+        const shots = [2,3,4,5][p];
+        for(let s=0;s<shots;s++) shoot(a0+(s-(shots-1)/2)*0.08, [130,140,145,155][p], 1, '#d7263d', {type:'enemy'});
+        if(p>=2) shoot(a0, 200, 2, '#f08020', {life:1.2});
         sfxShoot();
-        e.fireCool = lowHP? 0.45 : 0.7;
+        e.fireCool = [0.70,0.55,0.45,0.35][p];
       }
+
     } else if(e.bossKind==='tread'){
-      // slowly tracks; long mortar lobs + cannon volleys
+      // p0: 5 volley + 1 mortar | p1: 7 + 2 | p2: 7 + 2 + cross | p3: 9 + 3 + seeker
       e.vx = lerp(e.vx, ax*e.speed, 0.04);
       e.vy = lerp(e.vy, ay*e.speed, 0.04);
       if(e.fireCool<=0){
-        // 5-shot horizontal volley
         const a0 = Math.atan2(dy,dx);
-        for(let i=-2;i<=2;i++){
-          shoot(a0 + i*0.10, 140, 2, '#39c0ed', {type:'energy'});
-        }
-        // mortar lob
-        shoot(a0, 90, 2, '#3a3a40', {type:'mortar'});
+        const spread = [5,7,7,9][p];
+        for(let i=0;i<spread;i++) shoot(a0+(i-(spread-1)/2)*0.10, 140, 2, '#39c0ed', {type:'energy'});
+        const mortarCnt = [1,2,2,3][p];
+        for(let m=0;m<mortarCnt;m++) shoot(a0+rand(-0.3,0.3), 90, 2, '#3a3a40', {type:'mortar'});
+        if(p>=2) for(let i=0;i<4;i++) shoot(i*TAU/4, 70, 1, '#39c0ed', {type:'energy',life:2.0});
+        if(p>=3) shoot(a0, 60, 2, '#ff4455', {type:'energy',homing:true,life:3.5});
         sfxShoot(); shakeCam(3);
-        e.fireCool = lowHP? 1.1 : 1.7;
+        e.fireCool = [1.7,1.3,1.1,0.9][p];
       }
+
     } else if(e.bossKind==='mine'){
-      // floats around, drops mines + spits sprays
+      // p0: 3 spray + 1 mine | p1: 5 spray + 2 mines | p2: + radial ring | p3: + homing mine
       e.vx = lerp(e.vx, ax*e.speed*0.6, 0.06);
       e.vy = lerp(e.vy, ay*e.speed*0.6, 0.06);
       if(e.fireCool<=0){
         const a0 = Math.atan2(dy,dx);
-        // spray of 3
-        for(let i=-1;i<=1;i++) shoot(a0 + i*0.18, 110, 1, '#d7263d', {type:'enemy'});
-        // drop slow mine bullet at self
-        shoot(rand(0,TAU), 30, 2, '#3a3a40', {type:'mortar', life:3.5});
+        const sprayN = [3,5,6,8][p];
+        for(let i=0;i<sprayN;i++) shoot(a0+(i-(sprayN-1)/2)*0.18, 110, 1, '#d7263d', {type:'enemy'});
+        const mineN = [1,2,3,4][p];
+        for(let m=0;m<mineN;m++) shoot(rand(0,TAU), [30,35,35,40][p], 2, '#3a3a40', {type:'mortar',life:3.5});
+        if(p>=2){ const rn=8; for(let i=0;i<rn;i++) shoot((i/rn)*TAU+e.anim*0.5, 65, 1, '#ff6600', {type:'spore',life:2.0,bossBullet:true}); }
+        if(p>=3) shoot(a0, 55, 2, '#3a3a40', {type:'mortar',life:4.0,homing:true});
         sfxShoot();
-        e.fireCool = lowHP? 0.8 : 1.2;
+        e.fireCool = [1.2,1.0,0.8,0.6][p];
       }
+
     } else if(e.bossKind==='lich'){
-      // Pursue slowly, alternating twin-pistol bursts. At low HP, fires a radial death wave.
+      // p0: alternating burst | p1: + 8-wave | p2: + 10-wave | p3: + teleport + 14-wave
       e.vx = lerp(e.vx, ax*e.speed*0.7, 0.05);
       e.vy = lerp(e.vy, ay*e.speed*0.7, 0.05);
       if(e.fireCool<=0){
         const a0 = Math.atan2(dy,dx);
         e.lichSide = !e.lichSide;
         const offset = e.lichSide ? -0.25 : 0.25;
-        const burstSize = lowHP ? 5 : 3;
-        for(let i=0;i<burstSize;i++){
-          // both pistols fire spread bullets per pulse
-          for(let s=-1;s<=1;s+=2){
-            shoot(a0 + offset + s*0.05 + (i-burstSize/2)*0.07, 160, 1, '#d7263d', {type:'enemy', life:2.2});
-          }
-        }
-        // low-HP radial death wave
-        if(lowHP){
-          for(let r=0;r<10;r++){
-            shoot((r/10)*TAU + e.anim*0.3, 80, 1, '#5b2a8c', {type:'spore', life:2.4, bossBullet:true});
-          }
+        const burstSize = [3,4,5,6][p];
+        for(let i=0;i<burstSize;i++) for(let s=-1;s<=1;s+=2)
+          shoot(a0+offset+s*0.05+(i-burstSize/2)*0.07, 160, 1, '#d7263d', {type:'enemy',life:2.2});
+        const waveN = [0,8,10,14][p];
+        for(let r=0;r<waveN;r++) shoot((r/waveN)*TAU+e.anim*0.3, 80, 1, '#5b2a8c', {type:'spore',life:2.4,bossBullet:true});
+        if(p>=3 && Math.random()<0.35){
+          for(let k=0;k<12;k++) spawnPart(e.x,e.y,{vx:rand(-70,70),vy:rand(-70,70),life:0.5,c:'#5b2a8c',sz:2});
+          e.x = TILE*3 + Math.random()*(ROOM_PX_W-TILE*6);
+          e.y = TILE*3 + Math.random()*(ROOM_PX_H-TILE*6);
         }
         sfxShoot(); shakeCam(2);
-        e.fireCool = lowHP ? 0.7 : 1.2;
+        e.fireCool = [1.2,1.0,0.8,0.6][p];
       }
+
     } else if(e.bossKind==='blobu'){
-      // Hops toward player periodically + radial blob bursts.
+      // p0: slow hops + 8-radial | p1: faster + 10 | p2: + aimed triple | p3: frenzy + 14
       e.hopT = (e.hopT||0) - dt;
-      if(e.hopT <= 0){
-        e.hopT = 0.9 + Math.random()*0.5;
-        e.vx = ax * e.speed * 1.8;
-        e.vy = ay * e.speed * 1.8;
+      if(e.hopT<=0){
+        e.hopT = [0.9,0.7,0.6,0.45][p] + Math.random()*0.3;
+        e.vx = ax*e.speed*[1.8,2.0,2.2,2.6][p];
+        e.vy = ay*e.speed*[1.8,2.0,2.2,2.6][p];
       }
       if(e.fireCool<=0){
-        const n = lowHP ? 12 : 8;
-        for(let i=0;i<n;i++){
-          const a = (i/n)*TAU + e.anim*0.3;
-          shoot(a, 70, 1, '#d7263d', {type:'spore', life:2.5, bossBullet:true});
-        }
+        const n = [8,10,12,14][p];
+        for(let i=0;i<n;i++) shoot((i/n)*TAU+e.anim*0.3, [70,75,80,90][p], 1, '#d7263d', {type:'spore',life:2.5,bossBullet:true});
+        if(p>=2){ const a0=Math.atan2(dy,dx); for(let s=-1;s<=1;s++) shoot(a0+s*0.22, 120, 1, '#ff4400', {life:1.8}); }
         sfxShoot();
-        e.fireCool = lowHP ? 1.0 : 1.6;
+        e.fireCool = [1.6,1.3,1.0,0.75][p];
       }
+
     } else if(e.bossKind==='duke'){
-      // DUKE — gunslinger. Periodically dashes to a fresh angle off the player,
-      // then unloads a 5-shot rapid burst. Below 50% HP fires double bursts.
+      // p0: dash + 5-shot | p1: faster dash + double | p2: triple | p3: triple + bomb
       e.dashT = (e.dashT||0) - dt;
-      if(e.dashT <= 0){
-        // pick a destination ~80px from the player at a fresh angle
+      if(e.dashT<=0){
         const ang = Math.random()*TAU;
-        const tx = clamp(player.x + Math.cos(ang)*90, TILE+8, ROOM_PX_W-TILE-8);
-        const ty = clamp(player.y + Math.sin(ang)*90, TILE+8, ROOM_PX_H-TILE-8);
-        e.vx = (tx - e.x) * 1.6;
-        e.vy = (ty - e.y) * 1.6;
-        e.dashT = lowHP ? 1.4 : 2.0;
+        const tx = Math.max(TILE+8, Math.min(ROOM_PX_W-TILE-8, player.x+Math.cos(ang)*90));
+        const ty = Math.max(TILE+8, Math.min(ROOM_PX_H-TILE-8, player.y+Math.sin(ang)*90));
+        e.vx = (tx-e.x)*[1.6,1.8,2.0,2.3][p];
+        e.vy = (ty-e.y)*[1.6,1.8,2.0,2.3][p];
+        e.dashT = [2.0,1.6,1.3,1.0][p];
         for(let k=0;k<8;k++) spawnPart(e.x, e.y, {vx:rand(-60,60),vy:rand(-60,60),life:0.3,c:'#d7263d',sz:1});
       } else {
-        // strafe slowly while not dashing
         e.vx = lerp(e.vx, ax*e.speed*0.4, 0.06);
         e.vy = lerp(e.vy, ay*e.speed*0.4, 0.06);
       }
       if(e.fireCool<=0){
         const a0 = Math.atan2(dy,dx);
-        // 5-shot rapid burst with slight spread
-        for(let i=0;i<5;i++){
-          shoot(a0 + (i-2)*0.05, 180, 1, '#f0b429', {type:'enemy', life:1.6});
-        }
-        if(lowHP){
-          // double burst — second wave fans wider
-          for(let i=0;i<5;i++){
-            shoot(a0 + (i-2)*0.12, 160, 1, '#d7263d', {type:'enemy', life:1.8});
-          }
-        }
+        const burstCnt = [1,2,2,3][p];
+        for(let b=0;b<burstCnt;b++)
+          for(let i=0;i<5;i++) shoot(a0+(i-2)*[0.05,0.07,0.09,0.11][p], [180,185,190,195][p], 1,
+            b===0?'#f0b429':'#d7263d', {type:'enemy',life:[1.6,1.7,1.8,2.0][p]});
+        if(p>=3) shoot(a0, 50, 3, '#ff4400', {type:'mortar',life:2.0});
         sfxShoot(); shakeCam(2);
-        e.fireCool = lowHP ? 0.7 : 1.1;
+        e.fireCool = [1.1,0.9,0.7,0.55][p];
       }
+
     } else if(e.bossKind==='kraken'){
-      // KRAKEN — stationary tentacled brain. Continuously fires homing
-      // eye-bullets in a slow rotating spiral. Below 50% HP, spiral spins
-      // faster and adds extra arms.
-      // Drift very slowly toward room center to avoid getting cornered
+      // p0: 3-arm spiral | p1: 4-arm faster | p2: 5-arm + aimed burst | p3: 6-arm + cross
       const cx = ROOM_PX_W/2, cy = ROOM_PX_H/2;
-      const rx = (cx - e.x), ry = (cy - e.y);
-      const rd = Math.hypot(rx, ry)||1;
+      const rx = (cx-e.x), ry = (cy-e.y);
+      const rd = Math.hypot(rx,ry)||1;
       e.vx = lerp(e.vx, (rx/rd)*e.speed, 0.03);
       e.vy = lerp(e.vy, (ry/rd)*e.speed, 0.03);
-      e.spiralAng = (e.spiralAng||0) + dt * (lowHP ? 2.4 : 1.5);
+      e.spiralAng = (e.spiralAng||0) + dt*[1.5,1.9,2.3,2.8][p];
       if(e.fireCool<=0){
-        const arms = lowHP ? 4 : 3;
-        for(let s=0;s<arms;s++){
-          const a = e.spiralAng + (s/arms)*TAU;
-          shoot(a, 80, 1, '#9c5cd6', {type:'enemy', life:3.0, bossBullet:true, homing:true});
-        }
+        const arms = [3,4,5,6][p];
+        for(let s=0;s<arms;s++) shoot(e.spiralAng+(s/arms)*TAU, [80,85,88,92][p], 1, '#9c5cd6',
+          {type:'enemy',life:3.0,bossBullet:true,homing:true});
+        if(p>=2){ const a0=Math.atan2(dy,dx); for(let i=0;i<3;i++) shoot(a0+(i-1)*0.22, 110, 1, '#5b2a8c', {life:1.8}); }
+        if(p>=3) for(let i=0;i<4;i++) shoot(i*TAU/4, 95, 1, '#9c5cd6', {type:'enemy',life:2.4,bossBullet:true});
         sfxShoot();
-        e.fireCool = lowHP ? 0.18 : 0.28;
+        e.fireCool = [0.28,0.22,0.18,0.14][p];
       }
     }
     e.vx *= 0.92; e.vy *= 0.92;
@@ -6287,9 +6327,9 @@ function render(){
   if(state === STATE.BOOT){ renderBoot(); return; }
   if(state === STATE.MENU){ renderMenu(); return; }
   if(state === STATE.INTRO){ renderIntro(); return; }
-  if(state === STATE.DEATH){ renderRoom(); renderHUD(); renderDeath(); return; }
+  if(state === STATE.DEATH){ renderRoom(); renderHUD(); renderBossHUD(); renderDeath(); return; }
   if(state === STATE.WIN){ renderRoom(); renderHUD(); renderWin(); return; }
-  if(state === STATE.PAUSE){ renderRoom(); renderHUD(); renderPause(); return; }
+  if(state === STATE.PAUSE){ renderRoom(); renderHUD(); renderBossHUD(); renderPause(); return; }
 
   renderRoom();
   // HALLWAY CORRIDOR — overlay shown while moving between rooms. The player is
@@ -6297,6 +6337,7 @@ function render(){
   // current room with a stylised corridor and a small walking sprite.
   if(transitionDir && transitionT > 0){ renderHallway(); }
   renderHUD();
+  renderBossHUD();
   if(state === STATE.SHOP) renderShop();
   if(state === STATE.AUG)  renderAug();
 }
@@ -7973,6 +8014,74 @@ function drawSpriteOutline(spr, x, y, color){
 }
 
 /* ---------- HUD ---------- */
+/* ── ETG-style boss health bar — drawn at the top of the screen ── */
+function renderBossHUD(){
+  const r = curRoom && curRoom();
+  if(!r || !r.entities) return;
+  const boss = r.entities.find(e=>e.isBoss && !e.dead && e.hp>0);
+  if(!boss) return;
+  const bossNames = {watcher:'THE WATCHER',twin:'THE TWINS',tread:'THE TREAD',
+    mine:'THE MINE LAYER',lich:'THE LICH',blobu:'THE BLOBULORD',duke:'THE DUKE',kraken:'THE KRAKEN'};
+  const bossBarCols = {watcher:'#7b3adc',twin:'#d7263d',tread:'#39c0ed',mine:'#606070',
+    lich:'#c23030',blobu:'#e05010',duke:'#d4a820',kraken:'#9c5cd6'};
+  const name = bossNames[boss.bossKind] || 'BOSS';
+  const barCol = bossBarCols[boss.bossKind] || '#d7263d';
+  const pct = Math.max(0, boss.hp / boss.maxHp);
+  const ph = boss.phase || 0;
+
+  const barW = Math.floor(W * 0.56);
+  const barX = Math.floor(W/2 - barW/2);
+  const panY = 1;
+  const panH = 19;
+
+  // Panel bg — dark with gold border lines
+  ctx.fillStyle = 'rgba(4,3,8,0.90)';
+  ctx.fillRect(barX-5, panY, barW+10, panH);
+  // Gold outer border
+  ctx.fillStyle = 'rgba(200,160,55,0.45)';
+  ctx.fillRect(barX-5, panY,        barW+10, 1); // top
+  ctx.fillRect(barX-5, panY+panH-1, barW+10, 1); // bottom
+  ctx.fillRect(barX-5, panY,        1, panH);     // left
+  ctx.fillRect(barX+barW+4, panY,   1, panH);     // right
+
+  // Boss name — centred, small pixel font
+  drawText(name, W/2, panY+2, true, 5, '#f0e8c0');
+
+  // HP bar track
+  const hpBarY = panY+11, hpBarH=5;
+  ctx.fillStyle = '#06040e'; ctx.fillRect(barX, hpBarY, barW, hpBarH);
+
+  // HP fill
+  if(pct > 0){
+    ctx.fillStyle = barCol;
+    ctx.fillRect(barX, hpBarY, Math.floor(barW*pct), hpBarH);
+    // bright top-edge sheen on fill
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(barX, hpBarY, Math.floor(barW*pct), 1);
+    // 2-px bright pulse when near a phase boundary
+    const nearBnd = [0.75,0.5,0.25].some(t=>Math.abs(pct-t)<0.03);
+    if(nearBnd){ ctx.fillStyle='rgba(255,240,100,0.5)'; ctx.fillRect(barX,hpBarY,Math.floor(barW*pct),1); }
+  }
+
+  // Phase segment markers at 75%, 50%, 25%
+  for(const th2 of [0.75, 0.5, 0.25]){
+    const mx = barX + Math.floor(barW*th2);
+    ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(mx-1, hpBarY-1, 3, hpBarH+2);
+    ctx.fillStyle = 'rgba(255,210,80,0.45)'; ctx.fillRect(mx, hpBarY, 1, hpBarH);
+  }
+
+  // HP bar border
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth=1;
+  ctx.strokeRect(barX+0.5, hpBarY+0.5, barW-1, hpBarH-1);
+
+  // Phase pips (small squares, right side of bar)
+  for(let i=0;i<4;i++){
+    const dotX = barX+barW - 8 - i*7;
+    ctx.fillStyle = i<=ph ? barCol : 'rgba(255,255,255,0.08)';
+    ctx.fillRect(dotX, hpBarY+hpBarH+1, 5, 2);
+  }
+}
+
 function renderHUD(){
   // No opaque background bar — HUD elements float directly over the game world
 
